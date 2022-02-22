@@ -2,6 +2,10 @@
   "name": "iniscreen",
   "version": "0.1.0",
   "private": true,
+  "homepage": "./",
+  "main": "./public/electron.js",
+  "author": "John Doe",
+  "description": "My fantastic Electron app",
   "dependencies": {
     "@testing-library/jest-dom": "^5.16.2",
     "@testing-library/react": "^12.1.3",
@@ -10,9 +14,15 @@
     "@types/node": "^16.11.25",
     "@types/react": "^17.0.39",
     "@types/react-dom": "^17.0.11",
+    "@types/styled-components": "^5.1.23",
+    "fs": "^0.0.1-security",
+    "node-fetch": "^3.2.0",
+    "path-browserify": "^1.0.1",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
     "react-scripts": "5.0.0",
+    "screenshot-desktop": "^1.12.7",
+    "styled-components": "^5.3.3",
     "typescript": "^4.5.5",
     "web-vitals": "^2.1.4"
   },
@@ -20,7 +30,11 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "electron:start": "concurrently -k \"cross-env BROWSER=none npm start\" \"wait-on http://localhost:3000 && electronmon .\"",
+    "electron:package:mac": "npm run build && electron-builder -m -c.extraMetadata.main=build/electron.js",
+    "electron:package:win": "npm run build && electron-builder -w -c.extraMetadata.main=build/electron.js",
+    "electron:package:linux": "npm run build && electron-builder -l -c.extraMetadata.main=build/electron.js"
   },
   "eslintConfig": {
     "extends": [
@@ -30,14 +44,38 @@
   },
   "browserslist": {
     "production": [
-      ">0.2%",
-      "not dead",
-      "not op_mini all"
+      "last 1 electron version"
     ],
     "development": [
-      "last 1 chrome version",
-      "last 1 firefox version",
-      "last 1 safari version"
+      "last 1 electron version"
     ]
+  },
+  "devDependencies": {
+    "concurrently": "^7.0.0",
+    "cross-env": "^7.0.3",
+    "electron": "^17.0.1",
+    "electron-builder": "^22.14.13",
+    "electronmon": "^2.0.2",
+    "wait-on": "^6.0.1"
+  },
+  "build": {
+    "appId": "com.electron.myapp",
+    "productName": "My Electron App",
+    "files": [
+      "build/**/*",
+      "node_modules/**/*"
+    ],
+    "directories": {
+      "buildResources": "public"
+    },
+    "mac": {
+      "target": "dmg"
+    },
+    "win": {
+      "target": "nsis"
+    },
+    "linux": {
+      "target": "deb"
+    }
   }
 }
