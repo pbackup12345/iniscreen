@@ -20,15 +20,20 @@ let mainWindow;
 
 // Create the native browser window.
 function createWindow() {
+  const disp = screen.getPrimaryDisplay();
+
   mainWindow = new BrowserWindow({
-    width: 800,
-    height: 600,
+    width: 500,
+    height: Math.max(800, disp.bounds.height),
+    x: disp.bounds.width - 500,
+    y: 0,
     // Set the path of an additional "preload" script that can be used to
     // communicate between node-land and browser-land.
-    show: true,
+    show: false,
     webPreferences: {
       preload: path.join(__dirname, "preload.js"),
     },
+    skipTaskbar: true,
   });
 
   // In production, set the initial browser path to the local bundle generated
@@ -36,7 +41,7 @@ function createWindow() {
   // In development, set it to localhost to allow live/hot-reloading.
   const appURL = "https://app.inishare.com";
 
-  mainWindow.loadURL(appURL + "/app/clipper/?a=14");
+  mainWindow.loadURL(appURL + "/app/clipper/?a=19");
   // mainWindow.loadURL(appURL);
 
   // Automatically open Chrome's DevTools in development mode.
@@ -55,6 +60,7 @@ const createScreenShotWindow = () => {
   // if (screenShotterWindow !== null) {
   //   return;
   // }
+
   const appURL = app.isPackaged
     ? url.format({
         pathname: path.join(__dirname, "index.html"),
@@ -69,19 +75,20 @@ const createScreenShotWindow = () => {
     x: 0,
     y: 0,
     frame: false,
-    transparent: true,
-    resizable: false,
-    titleBarStyle: "hidden",
+    transparent: false,
+    // resizable: false,
+    // titleBarStyle: "hidden",
     webPreferences: {
       preload: path.join(__dirname, "preloadshot.js"),
     },
+    skipTaskbar: true,
   });
 
   titlebar =
     screenShotterWindow.getSize()[1] - screenShotterWindow.getContentSize()[1];
   screenShotterWindow.hide();
 
-  // screenShotterWindow.webContents.openDevTools();
+  screenShotterWindow.webContents.openDevTools();
 
   screenShotterWindow.setMenuBarVisibility(false);
   screenShotterWindow.loadURL(appURL);
@@ -90,14 +97,15 @@ const createScreenShotWindow = () => {
     screenShotterWindow.hide();
   });
 
+  ipcMain.on("hidemain", () => {
+    mainWindow.hide();
+  });
+
   ipcMain.on("picture", async (event, data) => {
     //eslint-disable-next-line
 
-    console.log(data);
     const image = nativeImage.createFromDataURL(data);
     clipboard.writeImage(image);
-
-    console.log(clipboard.readImage().toDataURL());
 
     //eslint-disable-next-line
 
@@ -113,7 +121,6 @@ const createScreenShotWindow = () => {
   });
 
   screenShotterWindow.on("closed", function () {
-    console.log("closing");
     screenShotterWindow = null;
   });
 };
@@ -141,12 +148,11 @@ app.whenReady().then(() => {
   createScreenShotWindow();
   setupLocalFilesNormalizerProxy();
 
-  const ret = globalShortcut.register("CommandOrControl+B", async () => {
+  const showCutter = async () => {
     console.log("CommandOrControl+B is pressed");
     // Type "Hello World".
 
     const img = await screenshotDesktop();
-    console.log(img);
 
     //@ts-ignore
     const allScreens = screen.getAllDisplays();
@@ -160,11 +166,10 @@ app.whenReady().then(() => {
     let top = 0;
 
     allScreens.forEach((screen) => {
-      left = Math.min(left, screen.bounds.x * screen.scaleFactor);
-      top = Math.min(top, screen.bounds.y * screen.scaleFactor);
-      fullHeight = fullHeight + screen.size.height * screen.scaleFactor;
-      fullWidth = fullWidth + screen.size.width * screen.scaleFactor;
-      console.log(screen.size.width);
+      left = Math.min(left, screen.bounds.x);
+      top = Math.min(top, screen.bounds.y);
+      fullHeight = fullHeight + screen.size.height;
+      fullWidth = fullWidth + screen.size.width;
     });
 
     if (
@@ -198,6 +203,10 @@ app.whenReady().then(() => {
       screenShotterWindow.setAlwaysOnTop(true, "pop-up-menu");
       screenShotterWindow.setOpacity(1);
     }, 100);
+  };
+
+  const ret = globalShortcut.register("CommandOrControl+B", async () => {
+    await showCutter();
   });
 
   app.on("activate", function () {
@@ -234,7 +243,3 @@ app.on("web-contents-createds", (event, contents) => {
 
 // In this file you can include the rest of your app's specific main process
 // code. You can also put them in separate files and require them here.
-
-ipcMain.on("shotscreen", (event, arg) => {
-  console.log(arg);
-});

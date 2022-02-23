@@ -1,5 +1,7 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import styled from "styled-components";
+//@ts-ignore
+// import { Editor } from "react-image-markup";
 
 const OverlayDiv = styled.div`
   position: absolute;
@@ -8,6 +10,7 @@ const OverlayDiv = styled.div`
   left: 0px;
   right: 0px;
   overflow: visible;
+  background: rgba(0, 0, 0, 0.1);
 `;
 
 const Canvas = styled.canvas`
@@ -20,7 +23,7 @@ const Canvas = styled.canvas`
 `;
 
 const MyImg = styled.img`
-  display: none;
+  display: block;
 `;
 
 const SelectionDiv = styled.div`
@@ -30,7 +33,8 @@ const SelectionDiv = styled.div`
   width: 0px;
   height: 0px;
   box-shadow: 0px 0px 3000px 3000px rgba(0, 0, 0, 0.1);
-  border: 1px dashed black;
+  outline: 1px dashed lightgrey;
+  background: rgba(0, 0, 0, 0);
   &:before {
     padding: 2px;
     font-size: 10px;
@@ -56,10 +60,14 @@ const blobToBase64 = (blob: any) => {
 const App = () => {
   const selectDivRef = useRef<HTMLDivElement>(null);
   const imgRef = useRef<HTMLCanvasElement>(null);
+  const picRef = useRef<HTMLImageElement>(null);
   const [mySrc, setMySrc] = useState<any>("");
   const [showButton, setShowButton] = useState(false);
   const [isSelection, setIsSelection] = useState(false);
   const imgDataRef = useRef<any>();
+  const editorRef = useRef<any>();
+  const [height, setHeight] = useState(0);
+  const [width, setWidth] = useState(0);
 
   const moveStatus = useRef({
     status: 0,
@@ -70,30 +78,91 @@ const App = () => {
   });
 
   useEffect(() => {
-    const blurScreen = () => {
-      moveStatus.current = {
-        status: 0,
-        startX: 0,
-        startY: 0,
-        endX: 0,
-        endY: 0,
-      };
-      positionSelection(false);
-      // @ts-ignore
-      const context = imgRef.current.getContext("2d");
-      if (context !== null && imgRef.current !== null) {
-        context.clearRect(0, 0, imgRef.current.width, imgRef.current.height);
+    const loadSelection = async () => {
+      var ctx = imgRef.current?.getContext("2d");
+
+      if (imgRef.current) {
+        imgRef.current.width = Math.abs(
+          moveStatus.current.endX - moveStatus.current.startX
+        );
+        imgRef.current.height = Math.abs(
+          moveStatus.current.endY - moveStatus.current.startY
+        );
       }
-      setTimeout(() => {
-        //@ts-ignore
-        window.myApi.request("now");
-      }, 100);
+
+      setWidth(Math.abs(moveStatus.current.endX - moveStatus.current.startX));
+      setHeight(Math.abs(moveStatus.current.endY - moveStatus.current.startY));
+
+      if (picRef.current) {
+        const factor = picRef.current.naturalWidth / imgDataRef.current.width;
+        ctx?.drawImage(
+          picRef.current,
+          Math.min(
+            moveStatus.current.startX * factor,
+            moveStatus.current.endX * factor
+          ),
+          Math.min(
+            moveStatus.current.startY * factor +
+              (navigator.platform === "MacIntel" ? 25 * factor : 0),
+            moveStatus.current.endY * factor +
+              (navigator.platform === "MacIntel" ? 25 * factor : 0)
+          ),
+          Math.abs(
+            (moveStatus.current.endX - moveStatus.current.startX) * factor
+          ),
+          Math.abs(
+            (moveStatus.current.endY - moveStatus.current.startY) * factor
+          ),
+          0,
+          0,
+          Math.abs(moveStatus.current.endX - moveStatus.current.startX),
+          Math.abs(moveStatus.current.endY - moveStatus.current.startY)
+        );
+      }
+
+      imgRef.current?.toBlob(
+        async (res) => {
+          const url = URL.createObjectURL(res as Blob);
+          editorRef.current.setBackgroundImage(url);
+          editorRef.current.set("circle");
+        },
+        undefined,
+        1
+      );
     };
 
-    window.addEventListener("blur", blurScreen);
+    if (showButton) {
+      loadSelection();
+    }
+  }, [showButton]);
+
+  const blurScreen = useCallback(() => {
+    moveStatus.current = {
+      status: 0,
+      startX: 0,
+      startY: 0,
+      endX: 0,
+      endY: 0,
+    };
+    positionSelection(false);
+    setWidth(0);
+    setHeight(0);
+    // @ts-ignore
+    const context = imgRef.current.getContext("2d");
+    if (context !== null && imgRef.current !== null) {
+      context.clearRect(0, 0, imgRef.current.width, imgRef.current.height);
+    }
+    setTimeout(() => {
+      //@ts-ignore
+      window.myApi.request("now");
+    }, 100);
+  }, []);
+
+  useEffect(() => {
+    // window.addEventListener("blur", blurScreen);
 
     return () => window.removeEventListener("blur", blurScreen);
-  }, []);
+  }, [blurScreen]);
 
   useEffect(() => {
     //@ts-ignore
@@ -102,6 +171,14 @@ const App = () => {
 
     window.myApi.onResponse((message) => {
       imgDataRef.current = message;
+      var blob = new Blob([imgDataRef.current.img], { type: "image/jpeg" });
+
+      setMySrc(URL.createObjectURL(blob));
+      if (picRef.current) {
+        picRef.current.style.width = imgDataRef.current.width + "px";
+        picRef.current.style.marginTop =
+          -(navigator.platform === "MacIntel" ? 25 : 0) + "px";
+      }
 
       // img.onload = function () {
       //   ctx?.drawImage(img, 0, 0, message.width, message.height);
@@ -187,7 +264,8 @@ const App = () => {
         imgRef.current.height = Math.abs(
           moveStatus.current.endY - moveStatus.current.startY
         );
-        const factor = 2;
+        const factor = img.naturalWidth / imgDataRef.current.width;
+
         ctx?.drawImage(
           img,
           Math.min(
@@ -195,8 +273,10 @@ const App = () => {
             moveStatus.current.endX * factor
           ),
           Math.min(
-            moveStatus.current.startY * factor + 44,
-            moveStatus.current.endY * factor + 44
+            moveStatus.current.startY * factor +
+              (navigator.platform === "MacIntel" ? 25 * factor : 0),
+            moveStatus.current.endY * factor +
+              (navigator.platform === "MacIntel" ? 25 * factor : 0)
           ),
           Math.abs(
             (moveStatus.current.endX - moveStatus.current.startX) * factor
@@ -211,8 +291,6 @@ const App = () => {
         );
       }
 
-      console.log("done");
-
       //@ts-ignore
       imgRef.current?.toBlob(async (res) => {
         console.log(res);
@@ -221,6 +299,16 @@ const App = () => {
         console.log(newRes);
         //@ts-ignore
         window.myApi.sendPicture(newRes);
+        setHeight(0);
+        setWidth(0);
+        moveStatus.current = {
+          status: 0,
+          startX: 0,
+          startY: 0,
+          endX: 0,
+          endY: 0,
+        };
+        positionSelection(false);
       });
     };
 
@@ -236,14 +324,15 @@ const App = () => {
   const keydown = useCallback(
     (e: any) => {
       if (e.key === "Escape") {
+        blurScreen();
         //@ts-ignore
         window.myApi.request("data");
       }
       //@ts-ignore
-      window.myApi.request("data");
+      //window.myApi.request("data");
     },
 
-    []
+    [blurScreen]
   );
 
   useEffect(() => {
@@ -290,6 +379,8 @@ const App = () => {
   const mouseDown = (e: React.MouseEvent) => {
     console.log(e.target);
     e.persist();
+    setWidth(0);
+    setHeight(0);
     setTimeout(() => {
       setShowButton(false);
     }, 100);
@@ -345,10 +436,18 @@ const App = () => {
         onMouseMove={mouseMove}
         onMouseUp={mouseUp}
       >
-        <MyImg src={mySrc} />
+        <MyImg src={mySrc} ref={picRef} />
         <Canvas ref={imgRef} />
         {isSelection ? (
-          <SelectionDiv ref={selectDivRef}>
+          <SelectionDiv
+            ref={selectDivRef}
+            onMouseUp={(e: any) => e.stopPropagation()}
+            onMouseDown={(e: any) => e.stopPropagation()}
+            onMouseMove={(e: any) => e.stopPropagation()}
+          >
+            {/* {showButton ? (
+              <Editor height={height} width={width} ref={editorRef} />
+            ) : null} */}
             {showButton ? (
               <button
                 onMouseDown={(e: any) => {
