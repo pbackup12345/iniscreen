@@ -41,7 +41,7 @@ function createWindow() {
   // In development, set it to localhost to allow live/hot-reloading.
   const appURL = "https://app.inishare.com";
 
-  mainWindow.loadURL(appURL + "/app/clipper/?a=19");
+  mainWindow.loadURL(appURL + "/app/clipper/?a=26");
   // mainWindow.loadURL(appURL);
 
   // Automatically open Chrome's DevTools in development mode.
@@ -75,9 +75,9 @@ const createScreenShotWindow = () => {
     x: 0,
     y: 0,
     frame: false,
-    transparent: false,
-    // resizable: false,
-    // titleBarStyle: "hidden",
+    transparent: true,
+    resizable: false,
+    titleBarStyle: "hidden",
     webPreferences: {
       preload: path.join(__dirname, "preloadshot.js"),
     },
@@ -88,7 +88,7 @@ const createScreenShotWindow = () => {
     screenShotterWindow.getSize()[1] - screenShotterWindow.getContentSize()[1];
   screenShotterWindow.hide();
 
-  screenShotterWindow.webContents.openDevTools();
+  //screenShotterWindow.webContents.openDevTools();
 
   screenShotterWindow.setMenuBarVisibility(false);
   screenShotterWindow.loadURL(appURL);
@@ -206,6 +206,9 @@ app.whenReady().then(() => {
   };
 
   const ret = globalShortcut.register("CommandOrControl+B", async () => {
+    if (screenShotterWindow.isVisible()) {
+      return;
+    }
     await showCutter();
   });
 
