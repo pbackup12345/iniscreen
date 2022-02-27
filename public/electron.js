@@ -8,10 +8,13 @@ const {
   screen,
   nativeImage,
   clipboard,
+  Tray,
+  Menu,
 } = require("electron");
 
 const path = require("path");
 const screenshotDesktop = require("screenshot-desktop");
+
 const url = require("url");
 
 let screenShotterWindow;
@@ -78,7 +81,6 @@ const createScreenShotWindow = () => {
     frame: false,
     transparent: true,
     resizable: false,
-    fullscreen: true,
     thickFrame: false,
     titleBarStyle: "hidden",
     webPreferences: {
@@ -122,10 +124,6 @@ const createScreenShotWindow = () => {
     e.preventDefault();
     screenShotterWindow.hide();
   });
-
-  screenShotterWindow.on("closed", function () {
-    screenShotterWindow = null;
-  });
 };
 
 // Setup a local proxy to adjust the paths of requested files when loading
@@ -143,10 +141,53 @@ function setupLocalFilesNormalizerProxy() {
   );
 }
 
+let tray;
 // This method will be called when Electron has finished its initialization and
 // is ready to create the browser windows.
 // Some APIs can only be used after this event occurs.
-app.whenReady().then(() => {
+app.whenReady().then(async () => {
+  app.on("before-quit", () => {
+    mainWindow.removeAllListeners();
+    screenShotterWindow.removeAllListeners();
+  });
+
+  tray = new Tray(
+    nativeImage.createFromDataURL(
+      "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAQlJREFUOE/VkzFKBEEQRd8H9QS7iZEn8AAmKnsCYXJdUPQGIooiKG5oKgrOwF5DBhMPYCAGBhMIBu4NNigpqJFl7BZMFqzoT/PrdTX1R2TKzBaADeBV0nvOp18ABXALvACFpI+U9wcgbt4CxsBSND0AB5LeupAUYAU4BJaBwQyglnSdBZhZD9gDHOD1CFyGPgbWQzf+NEkT//6ewMyOgHNgMYyut0NXwFnoqWtJV11AGQ1ufgL8ppto2o/J1lqPpJ0cYCipNDN/Sh2ATUmNmXnTPVDNBdAHTmKCC0mff5ogFZr/A/DVeYhS5WHylSa30A1S7j/zIJ1KGnVz4FHeBVZznXH+DNy1Uf4CBfOOEXzNCD8AAAAASUVORK5CYII="
+    )
+  );
+
+  const contextMenu = Menu.buildFromTemplate([
+    {
+      label: "Screenshot",
+      type: "normal",
+      click: () => {
+        showCutter();
+      },
+    },
+    {
+      label: "Clipboard",
+      type: "normal",
+      click: () => {
+        mainWindow.show();
+      },
+    },
+    {
+      type: "separator",
+    },
+    {
+      label: "Quit",
+      type: "normal",
+      click: () => {
+        console.log("buci");
+        app.quit();
+      },
+    },
+  ]);
+
+  tray.setToolTip("This is my application.");
+  tray.setContextMenu(contextMenu);
+
   createWindow();
   createScreenShotWindow();
   setupLocalFilesNormalizerProxy();
@@ -235,6 +276,7 @@ app.whenReady().then(() => {
 // There, it's common for applications and their menu bar to stay active until
 // the user quits  explicitly with Cmd + Q.
 app.on("window-all-closed", function () {
+  console.log("hufi");
   if (process.platform !== "darwin") {
     app.quit();
   }
