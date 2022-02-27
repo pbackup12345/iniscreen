@@ -74,9 +74,12 @@ const createScreenShotWindow = () => {
     height: 2000,
     x: 0,
     y: 0,
+    show: false,
     frame: false,
     transparent: true,
     resizable: false,
+    fullscreen: true,
+    thickFrame: false,
     titleBarStyle: "hidden",
     webPreferences: {
       preload: path.join(__dirname, "preloadshot.js"),
@@ -149,7 +152,7 @@ app.whenReady().then(() => {
   setupLocalFilesNormalizerProxy();
 
   const showCutter = async () => {
-    console.log("CommandOrControl+B is pressed");
+    console.log("CommandOrControl+F1 is pressed");
     // Type "Hello World".
 
     const img = await screenshotDesktop();
@@ -205,11 +208,18 @@ app.whenReady().then(() => {
     }, 100);
   };
 
-  const ret = globalShortcut.register("CommandOrControl+B", async () => {
+  globalShortcut.register("CommandOrControl+F2", async () => {
     if (screenShotterWindow.isVisible()) {
       return;
     }
     await showCutter();
+  });
+
+  globalShortcut.register("F2", async () => {
+    if (screenShotterWindow.isVisible()) {
+      return;
+    }
+    mainWindow.show();
   });
 
   app.on("activate", function () {
