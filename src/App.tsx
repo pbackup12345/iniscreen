@@ -104,7 +104,7 @@ const App = () => {
   const active = useRef<any>(0);
   const popupRef = useRef<any>();
   const [popupOpen, setPopupOpen] = useState(false);
-  const [fontColor, setFontColor] = useState("#888888");
+  const [fontColor, setFontColor] = useState("#ff3333");
   const [tool, setTool] = useState("arrow");
 
   const moveStatus = useRef({
@@ -237,6 +237,9 @@ const App = () => {
             imgRef.current.style.backgroundImage = "url('" + url + "')";
             imgRef.current.style.backgroundSize = "cover";
           }
+
+          //@ts-ignore
+          window.myApi.setOpacity();
 
           // ctx?.drawImage(
           //   picRef.current as HTMLImageElement,

@@ -30,6 +30,7 @@ function createWindow() {
     height: Math.max(800, disp.bounds.height),
     x: disp.bounds.width - 500,
     y: 0,
+
     // Set the path of an additional "preload" script that can be used to
     // communicate between node-land and browser-land.
     show: false,
@@ -44,7 +45,7 @@ function createWindow() {
   // In development, set it to localhost to allow live/hot-reloading.
   const appURL = "https://app.inishare.com";
 
-  mainWindow.loadURL(appURL + "/app/clipper/?a=26");
+  mainWindow.loadURL(appURL + "/app/clipper/?a=34");
   // mainWindow.loadURL(appURL);
 
   // Automatically open Chrome's DevTools in development mode.
@@ -102,6 +103,10 @@ const createScreenShotWindow = () => {
     screenShotterWindow.hide();
   });
 
+  ipcMain.on("opacity", () => {
+    screenShotterWindow.setOpacity(1);
+  });
+
   ipcMain.on("hidemain", () => {
     mainWindow.hide();
   });
@@ -146,6 +151,35 @@ let tray;
 // is ready to create the browser windows.
 // Some APIs can only be used after this event occurs.
 app.whenReady().then(async () => {
+  if (process.platform === "darwin") {
+    const template = [
+      {
+        label: app.getName(),
+        submenu: [
+          { role: "about" },
+          { type: "separator" },
+          { role: "hide" },
+          { role: "hideothers" },
+          { role: "unhide" },
+          { type: "separator" },
+          { role: "quit" },
+        ],
+      },
+      {
+        label: "View",
+        submenu: [{ role: "togglefullscreen" }],
+      },
+      {
+        role: "window",
+        submenu: [{ role: "minimize" }, { role: "close" }],
+      },
+    ];
+
+    Menu.setApplicationMenu(Menu.buildFromTemplate(template));
+  } else {
+    Menu.setApplicationMenu(null);
+  }
+
   app.on("before-quit", () => {
     mainWindow.removeAllListeners();
     screenShotterWindow.removeAllListeners();
@@ -245,7 +279,6 @@ app.whenReady().then(async () => {
     screenShotterWindow.show();
     setTimeout(() => {
       screenShotterWindow.setAlwaysOnTop(true, "pop-up-menu");
-      screenShotterWindow.setOpacity(1);
     }, 100);
   };
 

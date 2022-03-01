@@ -16,4 +16,5 @@ contextBridge.exposeInMainWorld("myApi", {
     ipcRenderer.on("ping", (event, ...args) => fn(...args));
   },
   sendPicture: (data) => ipcRenderer.postMessage("picture", data),
+  setOpacity: () => ipcRenderer.postMessage("opacity", {}),
 });
