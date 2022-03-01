@@ -43,7 +43,7 @@ function createWindow() {
   // In production, set the initial browser path to the local bundle generated
   // by the Create React App build process.
   // In development, set it to localhost to allow live/hot-reloading.
-  const appURL = "https://app.inishare.com";
+  const appURL = "https://app.ininotes.com";
 
   mainWindow.loadURL(appURL + "/app/clipper/?a=34");
   // mainWindow.loadURL(appURL);

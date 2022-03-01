@@ -76,7 +76,7 @@ const SelectionDiv = styled.div`
   left: 0px;
   width: 0px;
   height: 0px;
-  box-shadow: 0px 0px 3000px 3000px rgba(0, 0, 0, 0.1);
+  box-shadow: 0px 0px 3000px 3000px rgba(0, 0, 0, 0.2);
   outline: 1px dashed lightgrey;
   background: rgba(0, 0, 0, 0);
   &:before {
@@ -183,6 +183,7 @@ const App = () => {
     };
     positionSelection(false);
     setTexts([]);
+    setIsSelection(false);
 
     paths.current = [];
 
@@ -239,7 +240,7 @@ const App = () => {
           }
 
           //@ts-ignore
-          window.myApi.setOpacity();
+          setTimeout(() => window.myApi.setOpacity(), 100);
 
           // ctx?.drawImage(
           //   picRef.current as HTMLImageElement,
@@ -267,64 +268,6 @@ const App = () => {
     //   window.myApi.ipcRenderer //@ts-ignore
     //     .removeAllListeners("shot") as unknown as void;
   }, []);
-
-  // const setOriginalSize = () => {
-  //   const allScreens = remote.screen.getAllDisplays();
-
-  //   const [x, y] = win.getPosition();
-  //   const [width, height] = win.getSize();
-
-  //   let fullWidth = 0;
-  //   let fullHeight = 0;
-  //   let left = 0;
-  //   let top = 0;
-
-  //   console.log(allScreens);
-
-  //   allScreens.forEach((screen: any) => {
-  //     left = Math.min(left, screen.bounds.x * screen.scaleFactor);
-  //     top = Math.min(top, screen.bounds.y * screen.scaleFactor);
-  //     fullHeight = fullHeight + screen.size.height * screen.scaleFactor;
-  //     fullWidth = fullWidth + screen.size.width * screen.scaleFactor;
-  //   });
-
-  //   if (
-  //     x !== left ||
-  //     y !== top ||
-  //     fullHeight !== height ||
-  //     fullWidth !== width
-  //   ) {
-  //     win.setSize(Math.floor(fullWidth), Math.floor(fullHeight));
-
-  //     win.setPosition(Math.floor(left), Math.floor(top));
-  //     // @ts-ignore
-  //     imgRef.current.width = Math.floor(fullWidth);
-
-  //     // @ts-ignore
-  //     imgRef.current.height = Math.floor(fullHeight);
-  //   }
-  // };
-
-  // const createDecoy = () => {
-  //   const { BrowserWindow } = window.require("electron").remote;
-
-  //   let win = new BrowserWindow({
-  //     x: -30000,
-  //     y: -30000,
-  //     width: 10,
-  //     height: 10,
-  //     frame: false,
-  //     webPreferences: {
-  //       nodeIntegration: true,
-  //     },
-  //     show: false,
-  //     transparent: true,
-  //   });
-
-  //   decoy.current = win;
-
-  //   win.on("closed", () => (decoy.current = null));
-  // };
 
   const makeSelection = (e: any) => {
     e.stopPropagation();
@@ -751,7 +694,10 @@ const App = () => {
         ))}
         <MyImg src={mySrc} ref={picRef} />
         <Canvas ref={imgRef} />
-
+        <SelectionDiv
+          id="selectionx"
+          style={{ display: isSelection ? "none" : "block" }}
+        />
         <SelectionDiv
           id="selectionx"
           ref={selectDivRef}
