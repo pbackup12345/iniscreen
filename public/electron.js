@@ -83,7 +83,7 @@ function createAppWindow() {
     resizable: true,
   });
 
-  appWindow.webContents.openDevTools();
+  // appWindow.webContents.openDevTools();
 
   // In production, set the initial browser path to the local bundle generated
   // by the Create React App build process.
@@ -105,9 +105,7 @@ function createAppWindow() {
 
   appWindow.on("hide", function (e) {
     tray.displayBalloon({
-      icon: nativeImage.createFromPath(
-        path.join(__dirname, "logo32Template@2x.png")
-      ),
+      icon: nativeImage.createFromPath(path.join(__dirname, "icon.png")),
       iconType: "custom",
       title: "IniNotes...",
       content: "You can always open IniNotes by clicking on its icon here.",
