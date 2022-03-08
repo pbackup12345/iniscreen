@@ -1,6 +1,6 @@
 {
   "name": "iniscreen",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "private": true,
   "homepage": "./",
   "main": "./public/electron.js",
@@ -66,8 +66,8 @@
     "wait-on": "^6.0.1"
   },
   "build": {
-    "appId": "com.ininotes.myapp",
-    "productName": "IniNotes Research",
+    "appId": "com.ininotes.pp",
+    "productName": "IniNotes",
     "files": [
       "build/**/*",
       "node_modules/**/*"
@@ -78,7 +78,7 @@
     "mac": {
       "target": "dmg",
       "extendInfo": {
-        "LSUIElement": 1
+        "LSUIElement": 0
       }
     },
     "win": {

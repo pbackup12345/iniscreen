@@ -19,13 +19,14 @@ const url = require("url");
 
 let screenShotterWindow;
 let titlebar;
-let mainWindow;
+let cutterWindow;
+let appWindow;
 
 // Create the native browser window.
-function createWindow() {
+function createCutterWindow() {
   const disp = screen.getPrimaryDisplay();
 
-  mainWindow = new BrowserWindow({
+  cutterWindow = new BrowserWindow({
     width: 500,
     height: Math.max(800, disp.bounds.height),
     x: disp.bounds.width - 500,
@@ -33,11 +34,15 @@ function createWindow() {
 
     // Set the path of an additional "preload" script that can be used to
     // communicate between node-land and browser-land.
+
+    skipTaskbar: true,
+    maximizable: false,
+    fullscreenable: false,
+    minimizable: false,
     show: false,
     webPreferences: {
       preload: path.join(__dirname, "preload.js"),
     },
-    skipTaskbar: true,
   });
 
   // In production, set the initial browser path to the local bundle generated
@@ -45,26 +50,60 @@ function createWindow() {
   // In development, set it to localhost to allow live/hot-reloading.
   const appURL = "https://app.ininotes.com";
 
-  mainWindow.loadURL(appURL + "/app/clipper/?a=34");
-  // mainWindow.loadURL(appURL);
+  cutterWindow.loadURL(appURL + "/app/clipper/?a=35");
+  // cutterWindow.loadURL(appURL);
 
   // Automatically open Chrome's DevTools in development mode.
   if (!app.isPackaged) {
-    // mainWindow.webContents.openDevTools();
+    // cutterWindow.webContents.openDevTools();
   }
 
-  mainWindow.on("close", function (e) {
+  cutterWindow.on("close", function (e) {
     e.preventDefault();
-    mainWindow.hide();
+    cutterWindow.hide();
+  });
+}
+
+function createAppWindow() {
+  const disp = screen.getPrimaryDisplay();
+
+  appWindow = new BrowserWindow({
+    width: 1000,
+    height: 700,
+    x: 24,
+    y: 24,
+
+    // Set the path of an additional "preload" script that can be used to
+    // communicate between node-land and browser-land.
+    show: true,
+    webPreferences: {
+      sandbox: true,
+    },
+    resizable: true,
+  });
+
+  appWindow.webContents.openDevTools();
+
+  // In production, set the initial browser path to the local bundle generated
+  // by the Create React App build process.
+  // In development, set it to localhost to allow live/hot-reloading.
+  const appURL = "https://app.ininotes.com?a=5";
+
+  appWindow.loadURL(appURL);
+  // cutterWindow.loadURL(appURL);
+
+  // Automatically open Chrome's DevTools in development mode.
+  if (!app.isPackaged) {
+    // cutterWindow.webContents.openDevTools();
+  }
+
+  appWindow.on("close", function (e) {
+    e.preventDefault();
+    appWindow.hide();
   });
 }
 
 const createScreenShotWindow = () => {
-  // alert(sc)
-  // if (screenShotterWindow !== null) {
-  //   return;
-  // }
-
   const appURL = app.isPackaged
     ? url.format({
         pathname: path.join(__dirname, "index.html"),
@@ -83,11 +122,9 @@ const createScreenShotWindow = () => {
     transparent: true,
     resizable: false,
     thickFrame: false,
-    titleBarStyle: "hidden",
     webPreferences: {
       preload: path.join(__dirname, "preloadshot.js"),
     },
-    skipTaskbar: true,
   });
 
   titlebar =
@@ -108,7 +145,7 @@ const createScreenShotWindow = () => {
   });
 
   ipcMain.on("hidemain", () => {
-    mainWindow.hide();
+    cutterWindow.hide();
   });
 
   ipcMain.on("picture", async (event, data) => {
@@ -120,7 +157,7 @@ const createScreenShotWindow = () => {
     //eslint-disable-next-line
 
     screenShotterWindow.hide();
-    mainWindow.show();
+    cutterWindow.show();
   });
 
   // screenShotterWindow.webContents.openDevTools();
@@ -181,17 +218,23 @@ app.whenReady().then(async () => {
   }
 
   app.on("before-quit", () => {
-    mainWindow.removeAllListeners();
+    cutterWindow.removeAllListeners();
     screenShotterWindow.removeAllListeners();
+    appWindow.removeAllListeners();
   });
 
   tray = new Tray(
-    nativeImage.createFromDataURL(
-      "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAQlJREFUOE/VkzFKBEEQRd8H9QS7iZEn8AAmKnsCYXJdUPQGIooiKG5oKgrOwF5DBhMPYCAGBhMIBu4NNigpqJFl7BZMFqzoT/PrdTX1R2TKzBaADeBV0nvOp18ABXALvACFpI+U9wcgbt4CxsBSND0AB5LeupAUYAU4BJaBwQyglnSdBZhZD9gDHOD1CFyGPgbWQzf+NEkT//6ewMyOgHNgMYyut0NXwFnoqWtJV11AGQ1ufgL8ppto2o/J1lqPpJ0cYCipNDN/Sh2ATUmNmXnTPVDNBdAHTmKCC0mff5ogFZr/A/DVeYhS5WHylSa30A1S7j/zIJ1KGnVz4FHeBVZznXH+DNy1Uf4CBfOOEXzNCD8AAAAASUVORK5CYII="
-    )
+    nativeImage.createFromPath(path.join(__dirname, "logo32Template@2x.png"))
   );
 
   const contextMenu = Menu.buildFromTemplate([
+    {
+      label: "IniNotes",
+      type: "normal",
+      click: () => {
+        appWindow.show();
+      },
+    },
     {
       label: "Screenshot",
       type: "normal",
@@ -203,7 +246,7 @@ app.whenReady().then(async () => {
       label: "Clipboard",
       type: "normal",
       click: () => {
-        mainWindow.show();
+        cutterWindow.show();
       },
     },
     {
@@ -222,8 +265,10 @@ app.whenReady().then(async () => {
   tray.setToolTip("This is my application.");
   tray.setContextMenu(contextMenu);
 
-  createWindow();
+  createCutterWindow();
   createScreenShotWindow();
+  createAppWindow();
+
   setupLocalFilesNormalizerProxy();
 
   const showCutter = async () => {
@@ -293,15 +338,15 @@ app.whenReady().then(async () => {
     if (screenShotterWindow.isVisible()) {
       return;
     }
-    mainWindow.show();
+    cutterWindow.show();
   });
 
   app.on("activate", function () {
     // On macOS it's common to re-create a window in the app when the
     // dock icon is clicked and there are no other windows open.
-    if (BrowserWindow.getAllWindows().length === 0) {
-      createWindow();
-    }
+    // if (BrowserWindow.getAllWindows().length === 0) {
+    //   createCutterWindow();
+    // }
   });
 });
 
@@ -318,8 +363,12 @@ app.on("window-all-closed", function () {
 // If your app has no need to navigate or only needs to navigate to known pages,
 // it is a good idea to limit navigation outright to that known scope,
 // disallowing any other kinds of navigation.
-const allowedNavigationDestinations = "https://my-electron-app.com";
-app.on("web-contents-createds", (event, contents) => {
+const allowedNavigationDestinations = [
+  "https://app.ininotes.com",
+  "https://docs.google.com",
+  "https://drive.google.com",
+];
+app.on("web-contents-created", (event, contents) => {
   contents.on("will-navigate", (event, navigationUrl) => {
     const parsedUrl = new URL(navigationUrl);
 
