@@ -21,6 +21,7 @@ let screenShotterWindow;
 let titlebar;
 let cutterWindow;
 let appWindow;
+let tray;
 
 // Create the native browser window.
 function createCutterWindow() {
@@ -65,7 +66,7 @@ function createCutterWindow() {
 }
 
 function createAppWindow() {
-  const disp = screen.getPrimaryDisplay();
+  // const disp = screen.getPrimaryDisplay();
 
   appWindow = new BrowserWindow({
     width: 1000,
@@ -100,6 +101,21 @@ function createAppWindow() {
   appWindow.on("close", function (e) {
     e.preventDefault();
     appWindow.hide();
+  });
+
+  appWindow.on("hide", function (e) {
+    tray.displayBalloon({
+      icon: nativeImage.createFromPath(
+        path.join(__dirname, "logo32Template@2x.png")
+      ),
+      iconType: "custom",
+      title: "IniNotes...",
+      content: "You can always open IniNotes by clicking on its icon here.",
+    });
+
+    setTimeout(() => {
+      tray.removeBalloon();
+    }, 3000);
   });
 }
 
@@ -183,7 +199,6 @@ function setupLocalFilesNormalizerProxy() {
   );
 }
 
-let tray;
 // This method will be called when Electron has finished its initialization and
 // is ready to create the browser windows.
 // Some APIs can only be used after this event occurs.
@@ -227,6 +242,12 @@ app.whenReady().then(async () => {
     nativeImage.createFromPath(path.join(__dirname, "logo32Template@2x.png"))
   );
 
+  tray.on("click", function () {
+    tray.popUpContextMenu();
+  });
+
+  tray.setToolTip("IniNotes. Click to start...");
+
   const contextMenu = Menu.buildFromTemplate([
     {
       label: "IniNotes",
@@ -238,6 +259,7 @@ app.whenReady().then(async () => {
     {
       label: "Screenshot",
       type: "normal",
+      accelerator: "CommandOrControl+F2",
       click: () => {
         showCutter();
       },
@@ -245,6 +267,7 @@ app.whenReady().then(async () => {
     {
       label: "Clipboard",
       type: "normal",
+      accelerator: "F2",
       click: () => {
         cutterWindow.show();
       },
