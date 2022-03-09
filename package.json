@@ -62,12 +62,14 @@
     "cross-env": "^7.0.3",
     "electron": "^17.0.1",
     "electron-builder": "^22.14.13",
+    "electron-notarize": "^1.1.1",
     "electronmon": "^2.0.2",
     "wait-on": "^6.0.1"
   },
   "build": {
-    "appId": "com.ininotes.pp",
+    "appId": "com.iniscreen.app",
     "productName": "IniNotes",
+    "afterSign": "scripts/notarize.js",
     "files": [
       "build/**/*",
       "node_modules/**/*"
@@ -79,7 +81,11 @@
       "target": "dmg",
       "extendInfo": {
         "LSUIElement": 0
-      }
+      },
+      "hardenedRuntime": true,
+      "gatekeeperAssess": false,
+      "entitlements": "build/entitlements.mac.plist",
+      "entitlementsInherit": "build/entitlements.mac.plist"
     },
     "win": {
       "target": "nsis"
@@ -87,5 +93,8 @@
     "linux": {
       "target": "deb"
     }
+  },
+  "dmg": {
+    "sign": false
   }
 }

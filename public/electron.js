@@ -23,6 +23,10 @@ let cutterWindow;
 let appWindow;
 let tray;
 
+let appIcon = nativeImage.createFromPath(
+  path.join(__dirname, "logo32Template@2x.png")
+);
+
 // Create the native browser window.
 function createCutterWindow() {
   const disp = screen.getPrimaryDisplay();
@@ -216,6 +220,21 @@ app.whenReady().then(async () => {
         ],
       },
       {
+        label: "Edit",
+        submenu: [
+          { label: "Undo", accelerator: "CmdOrCtrl+Z", selector: "undo:" },
+          {
+            label: "Redo",
+            accelerator: "Shift+CmdOrCtrl+Z",
+            selector: "redo:",
+          },
+          { type: "separator" },
+          { label: "Cut", accelerator: "CmdOrCtrl+X", selector: "cut:" },
+          { label: "Copy", accelerator: "CmdOrCtrl+C", selector: "copy:" },
+          { label: "Paste", accelerator: "CmdOrCtrl+V", selector: "paste:" },
+        ],
+      },
+      {
         label: "View",
         submenu: [{ role: "togglefullscreen" }],
       },
@@ -236,9 +255,7 @@ app.whenReady().then(async () => {
     appWindow.removeAllListeners();
   });
 
-  tray = new Tray(
-    nativeImage.createFromPath(path.join(__dirname, "logo32Template@2x.png"))
-  );
+  tray = new Tray(appIcon);
 
   tray.on("click", function () {
     tray.popUpContextMenu();
@@ -296,7 +313,17 @@ app.whenReady().then(async () => {
     console.log("CommandOrControl+F1 is pressed");
     // Type "Hello World".
 
-    const img = await screenshotDesktop();
+    let img;
+    try {
+      img = await screenshotDesktop();
+
+      console.log(typeof img);
+      if (!Buffer.isBuffer(img)) {
+        return;
+      }
+    } catch (e) {
+      return;
+    }
 
     //@ts-ignore
     const allScreens = screen.getAllDisplays();
