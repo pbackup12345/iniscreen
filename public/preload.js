@@ -13,4 +13,8 @@ contextBridge.exposeInMainWorld("myApi", {
     ipcRenderer.send("hidemain", {
       data,
     }),
+  hideShowMain: (data) =>
+    ipcRenderer.send("hideshowmain", {
+      data,
+    }),
 });

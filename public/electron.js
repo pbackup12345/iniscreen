@@ -39,9 +39,11 @@ function createCutterWindow() {
 
     // Set the path of an additional "preload" script that can be used to
     // communicate between node-land and browser-land.
-
+    frame: false,
     skipTaskbar: true,
     maximizable: false,
+    titleBarStyle: "customButtonsOnHover",
+
     fullscreenable: false,
     minimizable: false,
     show: false,
@@ -50,12 +52,14 @@ function createCutterWindow() {
     },
   });
 
+  cutterWindow.webContents.openDevTools();
+
   // In production, set the initial browser path to the local bundle generated
   // by the Create React App build process.
   // In development, set it to localhost to allow live/hot-reloading.
   const appURL = "https://app.ininotes.com";
 
-  cutterWindow.loadURL(appURL + "/app/clipper/?a=36");
+  cutterWindow.loadURL(appURL + "/app/clipper/?a=40");
   // cutterWindow.loadURL(appURL);
 
   // Automatically open Chrome's DevTools in development mode.
@@ -175,6 +179,11 @@ const createScreenShotWindow = () => {
 
   ipcMain.on("hidemain", () => {
     cutterWindow.hide();
+  });
+
+  ipcMain.on("hideshowmain", () => {
+    cutterWindow.hide();
+    appWindow.show();
   });
 
   ipcMain.on("picture", async (event, data) => {
