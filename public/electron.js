@@ -61,7 +61,7 @@ function createCutterWindow() {
   // In development, set it to localhost to allow live/hot-reloading.
   const appURL = "https://app.ininotes.com";
 
-  cutterWindow.loadURL(appURL + "/app/clipper/?a=44");
+  cutterWindow.loadURL(appURL + "/app/clipper/?a=45");
   // cutterWindow.loadURL(appURL);
 
   // Automatically open Chrome's DevTools in development mode.
@@ -102,7 +102,7 @@ function createAppWindow() {
   // In production, set the initial browser path to the local bundle generated
   // by the Create React App build process.
   // In development, set it to localhost to allow live/hot-reloading.
-  const appURL = "https://app.ininotes.com?a=9";
+  const appURL = "https://app.ininotes.com?a=10";
 
   appWindow.loadURL(appURL);
   // cutterWindow.loadURL(appURL);
@@ -185,7 +185,7 @@ const createScreenShotWindow = () => {
   });
 
   ipcMain.on("hidemain", () => {
-    cutterWindow.hide();
+    // cutterWindow.hide();
   });
 
   ipcMain.on("hideshowmain", () => {

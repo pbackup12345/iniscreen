@@ -9,6 +9,7 @@ const { contextBridge, clipboard, ipcRenderer } = require("electron");
 contextBridge.exposeInMainWorld("myApi", {
   clipText: () => clipboard.readText(),
   clipImage: () => clipboard.readImage().toDataURL(),
+  clipClear: () => clipboard.clear(),
   hide: (data) =>
     ipcRenderer.send("hidemain", {
       data,
