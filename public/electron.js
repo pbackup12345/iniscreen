@@ -77,10 +77,13 @@ function createAppWindow() {
     height: 700,
     x: 24,
     y: 24,
+    frame: false,
+    titleBarStyle: "customButtonsOnHover",
 
     // Set the path of an additional "preload" script that can be used to
     // communicate between node-land and browser-land.
     show: true,
+    skipTaskbar: true,
     webPreferences: {
       sandbox: true,
     },
