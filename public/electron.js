@@ -55,7 +55,7 @@ function createCutterWindow() {
   // In development, set it to localhost to allow live/hot-reloading.
   const appURL = "https://app.ininotes.com";
 
-  cutterWindow.loadURL(appURL + "/app/clipper/?a=35");
+  cutterWindow.loadURL(appURL + "/app/clipper/?a=36");
   // cutterWindow.loadURL(appURL);
 
   // Automatically open Chrome's DevTools in development mode.
@@ -87,7 +87,7 @@ function createAppWindow() {
     resizable: true,
   });
 
-  // appWindow.webContents.openDevTools();
+  appWindow.webContents.openDevTools();
 
   // In production, set the initial browser path to the local bundle generated
   // by the Create React App build process.
@@ -102,7 +102,15 @@ function createAppWindow() {
     // cutterWindow.webContents.openDevTools();
   }
 
+  // ipcMain.on("printit", () => {
+  //   console.log("this is it");
+  //   appWindow.webContents.print({}, () => {
+  //     console.log("ha");
+  //   });
+  // });
+
   appWindow.on("close", function (e) {
+    console.log("close");
     e.preventDefault();
     appWindow.hide();
   });
@@ -219,21 +227,7 @@ app.whenReady().then(async () => {
           { role: "quit" },
         ],
       },
-      {
-        label: "Edit",
-        submenu: [
-          { label: "Undo", accelerator: "CmdOrCtrl+Z", selector: "undo:" },
-          {
-            label: "Redo",
-            accelerator: "Shift+CmdOrCtrl+Z",
-            selector: "redo:",
-          },
-          { type: "separator" },
-          { label: "Cut", accelerator: "CmdOrCtrl+X", selector: "cut:" },
-          { label: "Copy", accelerator: "CmdOrCtrl+C", selector: "copy:" },
-          { label: "Paste", accelerator: "CmdOrCtrl+V", selector: "paste:" },
-        ],
-      },
+
       {
         label: "View",
         submenu: [{ role: "togglefullscreen" }],
@@ -249,7 +243,8 @@ app.whenReady().then(async () => {
     Menu.setApplicationMenu(null);
   }
 
-  app.on("before-quit", () => {
+  app.on("before-quit", (e) => {
+    console.log(e);
     cutterWindow.removeAllListeners();
     screenShotterWindow.removeAllListeners();
     appWindow.removeAllListeners();
