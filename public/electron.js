@@ -33,9 +33,11 @@ function createCutterWindow() {
 
   cutterWindow = new BrowserWindow({
     width: 500,
-    height: Math.max(800, disp.bounds.height - 50),
+    height: Math.max(800, disp.bounds.height - 100),
     x: disp.bounds.width - 500,
-    y: 25,
+    y: 24,
+    maxWidth: 600,
+    minWidth: 300,
 
     // Set the path of an additional "preload" script that can be used to
     // communicate between node-land and browser-land.
@@ -193,6 +195,7 @@ const createScreenShotWindow = () => {
 
   ipcMain.on("showmain", () => {
     appWindow.show();
+    cutterWindow.hide();
   });
 
   ipcMain.on("picture", async (event, data) => {
