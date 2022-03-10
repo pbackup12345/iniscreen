@@ -6,6 +6,7 @@ const { contextBridge, ipcRenderer } = require("electron");
 // and node versions to the main window.
 // They'll be accessible at "window.versions".
 
-contextBridge.exposeInMainWorld("myApi", {
+contextBridge.exposeInMainWorld("myApiMain", {
   print: () => ipcRenderer.send("printit", {}),
+  hideApp: () => ipcRenderer.send("hideapp", {}),
 });

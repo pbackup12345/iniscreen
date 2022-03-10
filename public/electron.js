@@ -33,9 +33,9 @@ function createCutterWindow() {
 
   cutterWindow = new BrowserWindow({
     width: 500,
-    height: Math.max(800, disp.bounds.height),
+    height: Math.max(800, disp.bounds.height - 50),
     x: disp.bounds.width - 500,
-    y: 0,
+    y: 25,
 
     // Set the path of an additional "preload" script that can be used to
     // communicate between node-land and browser-land.
@@ -52,14 +52,14 @@ function createCutterWindow() {
     },
   });
 
-  cutterWindow.webContents.openDevTools();
+  // cutterWindow.webContents.openDevTools();
 
   // In production, set the initial browser path to the local bundle generated
   // by the Create React App build process.
   // In development, set it to localhost to allow live/hot-reloading.
   const appURL = "https://app.ininotes.com";
 
-  cutterWindow.loadURL(appURL + "/app/clipper/?a=41");
+  cutterWindow.loadURL(appURL + "/app/clipper/?a=43");
   // cutterWindow.loadURL(appURL);
 
   // Automatically open Chrome's DevTools in development mode.
@@ -89,17 +89,18 @@ function createAppWindow() {
     show: true,
     skipTaskbar: true,
     webPreferences: {
+      preload: path.join(__dirname, "preloadmain.js"),
       sandbox: true,
     },
     resizable: true,
   });
 
-  appWindow.webContents.openDevTools();
+  //  appWindow.webContents.openDevTools();
 
   // In production, set the initial browser path to the local bundle generated
   // by the Create React App build process.
   // In development, set it to localhost to allow live/hot-reloading.
-  const appURL = "https://app.ininotes.com?a=6";
+  const appURL = "https://app.ininotes.com?a=8";
 
   appWindow.loadURL(appURL);
   // cutterWindow.loadURL(appURL);
@@ -173,6 +174,10 @@ const createScreenShotWindow = () => {
     screenShotterWindow.hide();
   });
 
+  ipcMain.on("hideapp", () => {
+    appWindow.hide();
+  });
+
   ipcMain.on("opacity", () => {
     screenShotterWindow.setOpacity(1);
   });
@@ -183,6 +188,10 @@ const createScreenShotWindow = () => {
 
   ipcMain.on("hideshowmain", () => {
     cutterWindow.hide();
+    appWindow.show();
+  });
+
+  ipcMain.on("showmain", () => {
     appWindow.show();
   });
 
