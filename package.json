@@ -16,7 +16,9 @@
     "@types/react-color": "^3.0.6",
     "@types/react-dom": "^17.0.11",
     "@types/styled-components": "^5.1.23",
+    "electron-builder-notarize": "^1.4.0",
     "interactjs": "^1.10.11",
+    "mac-screen-capture-permissions": "^1.1.0",
     "path-browserify": "^1.0.1",
     "react": "^17.0.2",
     "react-color": "^2.19.3",
@@ -80,7 +82,9 @@
     "mac": {
       "target": "dmg",
       "extendInfo": {
-        "LSUIElement": 0
+        "LSUIElement": 0,
+        "NSMicrophoneUsageDescription": "To record voice for notes.",
+        "NSCameraUsageDescription": "To take pictures and insert them into your notes."
       },
       "hardenedRuntime": true,
       "gatekeeperAssess": false,

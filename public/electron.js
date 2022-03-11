@@ -10,7 +10,12 @@ const {
   clipboard,
   Tray,
   Menu,
+  dialog,
 } = require("electron");
+const {
+  hasScreenCapturePermission,
+  openSystemPreferences,
+} = require("mac-screen-capture-permissions");
 
 const path = require("path");
 const screenshotDesktop = require("screenshot-desktop");
@@ -26,6 +31,29 @@ let tray;
 let appIcon = nativeImage.createFromPath(
   path.join(__dirname, "logo32Template@2x.png")
 );
+
+const getScreenShotPermision = () => {
+  if (process.platform !== "darwin") {
+    return true;
+  }
+
+  if (hasScreenCapturePermission()) {
+    return true;
+  }
+
+  if (
+    dialog.showMessageBox({
+      title: `Permission for Screenshots...`,
+      message: `IniNotes needs permission to take screenshots. Click OK and give permission to IniNotes.`,
+      detail: `You will see a dialog. Click on the little lock in the lower left corner, then check IniNotes in the list, then click on the lock again.`,
+      buttons: ["Cancel", "OK"],
+    })
+  ) {
+    openSystemPreferences();
+  }
+
+  return false;
+};
 
 // Create the native browser window.
 function createCutterWindow() {
@@ -85,6 +113,7 @@ function createAppWindow() {
     y: 24,
     frame: false,
     titleBarStyle: "customButtonsOnHover",
+    acceptFirstMouse: true,
 
     // Set the path of an additional "preload" script that can be used to
     // communicate between node-land and browser-land.
@@ -195,7 +224,6 @@ const createScreenShotWindow = () => {
 
   ipcMain.on("showmain", () => {
     appWindow.show();
-    cutterWindow.hide();
   });
 
   ipcMain.on("picture", async (event, data) => {
@@ -350,6 +378,10 @@ app.whenReady().then(async () => {
   const showCutter = async () => {
     console.log("CommandOrControl+F1 is pressed");
     // Type "Hello World".
+
+    if (!getScreenShotPermision()) {
+      return;
+    }
 
     let img;
     try {
