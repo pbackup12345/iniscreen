@@ -31,7 +31,7 @@ let helpWindow;
 
 let myViewers = [];
 
-const grandom = 50;
+const grandom = 51;
 
 let appIcon = nativeImage.createFromPath(
   path.join(__dirname, "logo32Template@2x.png")
@@ -85,7 +85,7 @@ function createHelpWindow() {
     },
   });
 
-  // cutterWindow.webContents.openDevTools();
+  cutterWindow.webContents.openDevTools();
 
   // In production, set the initial browser path to the local bundle generated
   // by the Create React App build process.
