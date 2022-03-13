@@ -27,6 +27,11 @@ let titlebar;
 let cutterWindow;
 let appWindow;
 let tray;
+let helpWindow;
+
+let myViewers = [];
+
+const grandom = 50;
 
 let appIcon = nativeImage.createFromPath(
   path.join(__dirname, "logo32Template@2x.png")
@@ -55,6 +60,52 @@ const getScreenShotPermision = () => {
   return false;
 };
 
+function createHelpWindow() {
+  const disp = screen.getPrimaryDisplay();
+
+  helpWindow = new BrowserWindow({
+    width: 400,
+    height: Math.max(800, disp.bounds.height - 300),
+    x: disp.bounds.width - 500,
+    y: 24,
+    maxWidth: 600,
+    minWidth: 300,
+
+    // Set the path of an additional "preload" script that can be used to
+    // communicate between node-land and browser-land.
+    frame: false,
+    skipTaskbar: true,
+    maximizable: false,
+
+    fullscreenable: false,
+    minimizable: false,
+    show: false,
+    webPreferences: {
+      preload: path.join(__dirname, "preloadhelper.js"),
+    },
+  });
+
+  // cutterWindow.webContents.openDevTools();
+
+  // In production, set the initial browser path to the local bundle generated
+  // by the Create React App build process.
+  // In development, set it to localhost to allow live/hot-reloading.
+  const appURL = "https://app.ininotes.com/help/help?i=" + grandom;
+
+  helpWindow.loadURL(appURL);
+  // cutterWindow.loadURL(appURL);
+
+  // Automatically open Chrome's DevTools in development mode.
+  if (!app.isPackaged) {
+    // cutterWindow.webContents.openDevTools();
+  }
+
+  helpWindow.on("close", function (e) {
+    e.preventDefault();
+    helpWindow.hide();
+  });
+}
+
 // Create the native browser window.
 function createCutterWindow() {
   const disp = screen.getPrimaryDisplay();
@@ -72,7 +123,6 @@ function createCutterWindow() {
     frame: false,
     skipTaskbar: true,
     maximizable: false,
-    titleBarStyle: "customButtonsOnHover",
 
     fullscreenable: false,
     minimizable: false,
@@ -89,7 +139,7 @@ function createCutterWindow() {
   // In development, set it to localhost to allow live/hot-reloading.
   const appURL = "https://app.ininotes.com";
 
-  cutterWindow.loadURL(appURL + "/app/clipper/?a=435");
+  cutterWindow.loadURL(appURL + "/app/clipper/?a=" + grandom);
   // cutterWindow.loadURL(appURL);
 
   // Automatically open Chrome's DevTools in development mode.
@@ -103,35 +153,89 @@ function createCutterWindow() {
   });
 }
 
-function createAppWindow() {
-  // const disp = screen.getPrimaryDisplay();
-
-  appWindow = new BrowserWindow({
-    width: 1000,
+function createViewerWindow(url) {
+  const viewerWindow = new BrowserWindow({
+    width: 900,
     height: 700,
-    x: 24,
-    y: 24,
+    x: 70,
+    y: 70,
     frame: false,
-    titleBarStyle: "customButtonsOnHover",
     acceptFirstMouse: true,
+    backgroundColor: "#333333",
 
     // Set the path of an additional "preload" script that can be used to
     // communicate between node-land and browser-land.
-    show: true,
+    show: false,
     skipTaskbar: true,
     webPreferences: {
-      preload: path.join(__dirname, "preloadmain.js"),
-      sandbox: true,
+      preload: path.join(__dirname, "preloadView.js"),
+      sandbox: false,
     },
     resizable: true,
   });
 
-  //  appWindow.webContents.openDevTools();
+  viewerWindow.show();
+  viewerWindow.on("ready-to-show", () => {});
+
+  // viewerWindow.webContents.openDevTools();
+
+  viewerWindow.on("close", (e) => {
+    const thisSender = myViewers.find(
+      (item) => item.id === viewerWindow.webContents.id
+    );
+
+    if (thisSender.isChanged) {
+      e.preventDefault();
+      viewerWindow.webContents.postMessage("closeasksave", {});
+      return;
+    }
+
+    myViewers = myViewers.filter(
+      (item) => item.id !== viewerWindow.webContents.id
+    );
+
+    updateContextMenu();
+  });
+
+  viewerWindow.loadURL(
+    "https://app.ininotes.com/app/beditor?id=" + url + "%2f&a=" + grandom
+  );
+
+  return viewerWindow;
+}
+
+function createAppWindow() {
+  // const disp = screen.getPrimaryDisplay();
+
+  appWindow = new BrowserWindow({
+    width: 750,
+    height: 700,
+    x: 24,
+    y: 24,
+    frame: false,
+    acceptFirstMouse: true,
+
+    // Set the path of an additional "preload" script that can be used to
+    // communicate between node-land and browser-land.
+    show: false,
+    skipTaskbar: true,
+    webPreferences: {
+      preload: path.join(__dirname, "preloadmain.js"),
+      sandbox: false,
+    },
+    resizable: true,
+  });
+
+  appWindow.on("ready-to-show", () => {
+    appWindow.show();
+  });
+
+  // appWindow.webContents.openDevTools();
 
   // In production, set the initial browser path to the local bundle generated
   // by the Create React App build process.
   // In development, set it to localhost to allow live/hot-reloading.
-  const appURL = "https://app.ininotes.com?a=110";
+  const appURL = "https://app.ininotes.com?a=" + grandom;
 
   appWindow.loadURL(appURL);
   // cutterWindow.loadURL(appURL);
@@ -149,7 +253,6 @@ function createAppWindow() {
   // });
 
   appWindow.on("close", function (e) {
-    console.log("close");
     e.preventDefault();
     appWindow.hide();
   });
@@ -209,6 +312,10 @@ const createScreenShotWindow = () => {
     appWindow.hide();
   });
 
+  ipcMain.on("showclip", () => {
+    cutterWindow.show();
+  });
+
   ipcMain.on("opacity", () => {
     screenShotterWindow.setOpacity(1);
   });
@@ -226,6 +333,15 @@ const createScreenShotWindow = () => {
     appWindow.show();
   });
 
+  ipcMain.on("showhelptopic", (event, data) => {
+    helpWindow.webContents.postMessage("showhelp", {
+      code: data.code,
+    });
+    setTimeout(() => {
+      helpWindow.show();
+    }, []);
+  });
+
   ipcMain.on("picture", async (event, data) => {
     //eslint-disable-next-line
 
@@ -238,12 +354,186 @@ const createScreenShotWindow = () => {
     cutterWindow.show();
   });
 
+  ipcMain.on("openurl", (event, data) => {
+    const myContents = myViewers.find((window) => window.url === data.url);
+
+    if (myContents) {
+      const myWindow = BrowserWindow.getAllWindows().find(
+        (item) => item.webContents.id === myContents.id
+      );
+      myWindow.show();
+      return;
+    }
+
+    const newWindow = createViewerWindow(data.url);
+
+    newWindow.title =
+      decodeURIComponent(data.url).split("/")[3] || "Untitled Note";
+
+    myViewers.push({
+      id: newWindow.webContents.id,
+      url: data.url,
+      title: newWindow.title,
+    });
+    updateContextMenu();
+  });
+
+  ipcMain.on("showhelp", (event, data) => {
+    createViewerWindow(data.url);
+  });
+
+  ipcMain.on("ischanged", (event, data) => {
+    myViewers = myViewers.map((item) =>
+      item.id === event.sender.id
+        ? { ...item, isChanged: data.isChanged }
+        : { ...item }
+    );
+  });
+
+  ipcMain.on("closeview", (event, data) => {
+    const myWindow = BrowserWindow.getAllWindows().find(
+      (item) => item.webContents.id === event.sender.id
+    );
+
+    if (data.force) {
+      myViewers = myViewers.map((item) =>
+        item.id === event.sender.id
+          ? { ...item, isChanged: false }
+          : { ...item }
+      );
+    }
+    myWindow.close();
+  });
+
+  ipcMain.on("closehelp", (event) => {
+    helpWindow.hide();
+  });
+
   // screenShotterWindow.webContents.openDevTools();
 
   screenShotterWindow.on("close", function (e) {
     e.preventDefault();
     screenShotterWindow.hide();
   });
+};
+
+const showCutter = async () => {
+  // Type "Hello World".
+
+  if (!getScreenShotPermision()) {
+    return;
+  }
+
+  let img;
+  try {
+    img = await screenshotDesktop();
+
+    if (!Buffer.isBuffer(img)) {
+      return;
+    }
+  } catch (e) {
+    return;
+  }
+
+  //@ts-ignore
+  const allScreens = screen.getAllDisplays();
+
+  const [x, y] = screenShotterWindow.getPosition();
+  let [width, height] = screenShotterWindow.getSize();
+
+  let fullWidth = 0;
+  let fullHeight = 0;
+  let left = 0;
+  let top = 0;
+
+  allScreens.forEach((screen) => {
+    left = Math.min(left, screen.bounds.x);
+    top = Math.min(top, screen.bounds.y);
+    fullHeight = fullHeight + screen.size.height;
+    fullWidth = fullWidth + screen.size.width;
+  });
+
+  if (x !== left || y !== top || fullHeight !== height || fullWidth !== width) {
+    screenShotterWindow.setSize(Math.floor(fullWidth), Math.floor(fullHeight));
+
+    screenShotterWindow.setPosition(Math.floor(left), Math.floor(top));
+    // @ts-ignore
+    width = Math.floor(fullWidth);
+
+    // @ts-ignore
+    height = Math.floor(fullHeight);
+  }
+
+  screenShotterWindow.webContents.postMessage("ping", {
+    img: img,
+    width: width,
+    height: height,
+    titlebar: titlebar,
+  });
+  screenShotterWindow.setOpacity(0);
+  screenShotterWindow.show();
+  setTimeout(() => {
+    screenShotterWindow.setAlwaysOnTop(true, "pop-up-menu");
+  }, 100);
+};
+
+const updateContextMenu = () => {
+  const windowMenu = myViewers.map((item) => ({
+    label: item.title.replace("|", " - "),
+    type: "normal",
+    click: () => {
+      const awindow = BrowserWindow.getAllWindows().find(
+        (win) => win.webContents.id === item.id
+      );
+
+      if (awindow) {
+        awindow.show();
+        awindow.focus();
+      }
+    },
+  }));
+
+  const contextMenu = Menu.buildFromTemplate([
+    {
+      label: "IniNotes",
+      type: "normal",
+      click: () => {
+        appWindow.show();
+      },
+    },
+    {
+      label: "Screenshot",
+      type: "normal",
+      accelerator: "CommandOrControl+F2",
+      click: () => {
+        showCutter();
+      },
+    },
+    {
+      label: "Clipboard",
+      type: "normal",
+      accelerator: "F2",
+      click: () => {
+        cutterWindow.show();
+      },
+    },
+    {
+      type: "separator",
+    },
+    ...windowMenu,
+    {
+      type: "separator",
+    },
+    {
+      label: "Quit",
+      type: "normal",
+      click: () => {
+        app.quit();
+      },
+    },
+  ]);
+
+  tray.setContextMenu(contextMenu);
 };
 
 // Setup a local proxy to adjust the paths of requested files when loading
@@ -315,10 +605,21 @@ app.whenReady().then(async () => {
   }
 
   app.on("before-quit", (e) => {
-    console.log(e);
-    cutterWindow.removeAllListeners();
-    screenShotterWindow.removeAllListeners();
-    appWindow.removeAllListeners();
+    const inComplete = myViewers.find((item) => item.isChanged);
+
+    if (inComplete) {
+      e.preventDefault();
+      const myWindow = BrowserWindow.getAllWindows().find(
+        (item) => item.webContents.id === inComplete.id
+      );
+      myWindow.show();
+      myWindow.close();
+      return;
+    }
+
+    BrowserWindow.getAllWindows().forEach((window) =>
+      window.removeAllListeners()
+    );
   });
 
   tray = new Tray(appIcon);
@@ -329,121 +630,15 @@ app.whenReady().then(async () => {
 
   tray.setToolTip("IniNotes. Click to start...");
 
-  const contextMenu = Menu.buildFromTemplate([
-    {
-      label: "IniNotes",
-      type: "normal",
-      click: () => {
-        appWindow.show();
-      },
-    },
-    {
-      label: "Screenshot",
-      type: "normal",
-      accelerator: "CommandOrControl+F2",
-      click: () => {
-        showCutter();
-      },
-    },
-    {
-      label: "Clipboard",
-      type: "normal",
-      accelerator: "F2",
-      click: () => {
-        cutterWindow.show();
-      },
-    },
-    {
-      type: "separator",
-    },
-    {
-      label: "Quit",
-      type: "normal",
-      click: () => {
-        console.log("buci");
-        app.quit();
-      },
-    },
-  ]);
-
   tray.setToolTip("This is my application.");
-  tray.setContextMenu(contextMenu);
+  updateContextMenu();
 
   createCutterWindow();
   createScreenShotWindow();
   createAppWindow();
+  createHelpWindow();
 
   setupLocalFilesNormalizerProxy();
-
-  const showCutter = async () => {
-    console.log("CommandOrControl+F1 is pressed");
-    // Type "Hello World".
-
-    if (!getScreenShotPermision()) {
-      return;
-    }
-
-    let img;
-    try {
-      img = await screenshotDesktop();
-
-      console.log(typeof img);
-      if (!Buffer.isBuffer(img)) {
-        return;
-      }
-    } catch (e) {
-      return;
-    }
-
-    //@ts-ignore
-    const allScreens = screen.getAllDisplays();
-
-    const [x, y] = screenShotterWindow.getPosition();
-    let [width, height] = screenShotterWindow.getSize();
-
-    let fullWidth = 0;
-    let fullHeight = 0;
-    let left = 0;
-    let top = 0;
-
-    allScreens.forEach((screen) => {
-      left = Math.min(left, screen.bounds.x);
-      top = Math.min(top, screen.bounds.y);
-      fullHeight = fullHeight + screen.size.height;
-      fullWidth = fullWidth + screen.size.width;
-    });
-
-    if (
-      x !== left ||
-      y !== top ||
-      fullHeight !== height ||
-      fullWidth !== width
-    ) {
-      screenShotterWindow.setSize(
-        Math.floor(fullWidth),
-        Math.floor(fullHeight)
-      );
-
-      screenShotterWindow.setPosition(Math.floor(left), Math.floor(top));
-      // @ts-ignore
-      width = Math.floor(fullWidth);
-
-      // @ts-ignore
-      height = Math.floor(fullHeight);
-    }
-
-    screenShotterWindow.webContents.postMessage("ping", {
-      img: img,
-      width: width,
-      height: height,
-      titlebar: titlebar,
-    });
-    screenShotterWindow.setOpacity(0);
-    screenShotterWindow.show();
-    setTimeout(() => {
-      screenShotterWindow.setAlwaysOnTop(true, "pop-up-menu");
-    }, 100);
-  };
 
   globalShortcut.register("CommandOrControl+F2", async () => {
     if (screenShotterWindow.isVisible()) {
@@ -472,7 +667,6 @@ app.whenReady().then(async () => {
 // There, it's common for applications and their menu bar to stay active until
 // the user quits  explicitly with Cmd + Q.
 app.on("window-all-closed", function () {
-  console.log("hufi");
   if (process.platform !== "darwin") {
     app.quit();
   }
