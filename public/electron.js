@@ -630,7 +630,7 @@ app.whenReady().then(async () => {
 
   tray.setToolTip("IniNotes. Click to start...");
 
-  tray.setToolTip("This is my application.");
+  // tray.setToolTip("This is my application.");
   updateContextMenu();
 
   createCutterWindow();
