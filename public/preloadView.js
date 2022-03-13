@@ -8,6 +8,8 @@ const { contextBridge, ipcRenderer } = require("electron");
 
 contextBridge.exposeInMainWorld("myApiView", {
   closeMe: (force = false) => ipcRenderer.send("closeview", { force: force }),
+  pinMe: () => ipcRenderer.send("pinme", {}),
+  minimizeMe: () => ipcRenderer.send("minimizeme", {}),
   changed: (isChanged) =>
     ipcRenderer.send("ischanged", { isChanged: isChanged }),
   showHelp: (code) => ipcRenderer.send("showhelptopic", { code: code }),

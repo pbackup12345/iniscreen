@@ -11,6 +11,7 @@ contextBridge.exposeInMainWorld("myApiHelper", {
     ipcRenderer.send("hideme", {
       data,
     }),
+  pinMe: () => ipcRenderer.send("pinme", {}),
   closeMe: () => ipcRenderer.send("closehelp", {}),
   onHelp: (fn) => {
     // Deliberately strip event as it includes `sender`

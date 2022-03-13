@@ -31,7 +31,7 @@ let helpWindow;
 
 let myViewers = [];
 
-const grandom = 53;
+const grandom = 56;
 
 let appIcon = nativeImage.createFromPath(
   path.join(__dirname, "logo32Template@2x.png")
@@ -322,6 +322,24 @@ const createScreenShotWindow = () => {
 
   ipcMain.on("hidemain", () => {
     cutterWindow.hide();
+  });
+
+  ipcMain.on("pinme", (event) => {
+    const myWindow = BrowserWindow.getAllWindows().find(
+      (item) => item.webContents.id === event.sender.id
+    );
+    if (myWindow.isAlwaysOnTop()) {
+      myWindow.setAlwaysOnTop(false);
+    } else {
+      myWindow.setAlwaysOnTop(true);
+    }
+  });
+
+  ipcMain.on("minimizeme", (event) => {
+    const myWindow = BrowserWindow.getAllWindows().find(
+      (item) => item.webContents.id === event.sender.id
+    );
+    myWindow.minimize();
   });
 
   ipcMain.on("hideshowmain", () => {
