@@ -169,7 +169,7 @@ function createViewerWindow(url) {
     skipTaskbar: true,
     webPreferences: {
       preload: path.join(__dirname, "preloadView.js"),
-      sandbox: false,
+      sandbox: true,
     },
     resizable: true,
   });
@@ -221,7 +221,7 @@ function createAppWindow() {
     skipTaskbar: true,
     webPreferences: {
       preload: path.join(__dirname, "preloadmain.js"),
-      sandbox: false,
+      sandbox: true,
     },
     resizable: true,
   });

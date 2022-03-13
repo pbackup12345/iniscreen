@@ -29,7 +29,6 @@
     "reactjs-popup": "^2.0.5",
     "reactstrap": "^9.0.1",
     "screenshot-desktop": "^1.12.7",
-    "sharp": "^0.30.1",
     "styled-components": "^5.3.3",
     "typescript": "^4.5.5",
     "web-vitals": "^2.1.4"
@@ -80,7 +79,14 @@
       "buildResources": "public"
     },
     "mac": {
-      "target": "dmg",
+      "target": [
+        {
+          "target": "dmg",
+          "arch": [
+            "universal"
+          ]
+        }
+      ],
       "extendInfo": {
         "LSUIElement": 0,
         "NSMicrophoneUsageDescription": "To record voice for notes.",
