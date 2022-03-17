@@ -462,7 +462,7 @@ const createScreenShotWindow = () => {
     store.set("version", version);
     grandom = version;
 
-    if (version !== oldVersion && !oldVersion) {
+    if (version !== oldVersion && oldVersion) {
       const appURL = "https://app.ininotes.com/help/help?i=" + grandom;
 
       helpWindow.loadURL(appURL);
@@ -470,6 +470,19 @@ const createScreenShotWindow = () => {
       const appURLCutter = "https://app.ininotes.com/app/clipper/?a=" + grandom;
 
       cutterWindow.loadURL(appURLCutter);
+
+      myViewers.forEach((webItem) => {
+        const myWindow = BrowserWindow.getAllWindows().find(
+          (item) => item.webContents.id === webItem.id
+        );
+
+        myWindow.loadURL(
+          "https://app.ininotes.com/app/beditor?id=" +
+            webItem.url +
+            "%2f&a=" +
+            grandom
+        );
+      });
     }
 
     updateContextMenu();
