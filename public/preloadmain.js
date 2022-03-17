@@ -8,6 +8,7 @@ const { contextBridge, ipcRenderer } = require("electron");
 
 contextBridge.exposeInMainWorld("myApiMain", {
   opening: (url) => ipcRenderer.send("openurl", { url: url }),
+  versioning: (version) => ipcRenderer.send("versioning", { version: version }),
   print: () => ipcRenderer.send("printit", {}),
   hideApp: () => ipcRenderer.send("hideapp", {}),
   showClipboard: () => ipcRenderer.send("showclip", {}),

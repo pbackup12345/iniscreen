@@ -35,7 +35,7 @@ let helpWindow;
 
 let myViewers = [];
 
-const grandom = 81;
+let grandom = store.get("version") || 0;
 
 let appIcon = nativeImage.createFromPath(
   path.join(__dirname, "logo32Template@2x.png")
@@ -454,6 +454,27 @@ const createScreenShotWindow = () => {
     updateContextMenu();
   });
 
+  ipcMain.on("versioning", (event, data) => {
+    const version = data.version;
+
+    const oldVersion = store.get("version");
+
+    store.set("version", version);
+    grandom = version;
+
+    if (version !== oldVersion && !oldVersion) {
+      const appURL = "https://app.ininotes.com/help/help?i=" + grandom;
+
+      helpWindow.loadURL(appURL);
+
+      const appURLCutter = "https://app.ininotes.com/app/clipper/?a=" + grandom;
+
+      cutterWindow.loadURL(appURLCutter);
+    }
+
+    updateContextMenu();
+  });
+
   ipcMain.on("showhelp", (event, data) => {
     createViewerWindow(data.url);
   });
@@ -579,7 +600,7 @@ const updateContextMenu = () => {
 
   const contextMenu = Menu.buildFromTemplate([
     {
-      label: "IniNotes",
+      label: "IniNotes (" + grandom + ")",
       type: "normal",
       click: () => {
         appWindow.show();
