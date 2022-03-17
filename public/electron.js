@@ -35,7 +35,7 @@ let helpWindow;
 
 let myViewers = [];
 
-const grandom = 79;
+const grandom = 81;
 
 let appIcon = nativeImage.createFromPath(
   path.join(__dirname, "logo32Template@2x.png")
@@ -90,6 +90,13 @@ function createHelpWindow() {
     },
   });
 
+  const pos = JSON.parse(store.get("help") || "{}");
+
+  if (Array.isArray(pos)) {
+    helpWindow.setPosition(pos[0], pos[1]);
+    helpWindow.setSize(pos[2], pos[3]);
+  }
+
   // cutterWindow.webContents.openDevTools();
 
   // In production, set the initial browser path to the local bundle generated
@@ -107,6 +114,12 @@ function createHelpWindow() {
 
   helpWindow.on("close", function (e) {
     e.preventDefault();
+    const place = JSON.stringify([
+      ...helpWindow.getPosition(),
+      ...helpWindow.getSize(),
+    ]);
+
+    store.set("help", place);
     helpWindow.hide();
   });
 }
@@ -138,6 +151,13 @@ function createCutterWindow() {
     },
   });
 
+  const pos = JSON.parse(store.get("cutter") || "{}");
+
+  if (Array.isArray(pos)) {
+    cutterWindow.setPosition(pos[0], pos[1]);
+    cutterWindow.setSize(pos[2], pos[3]);
+  }
+
   cutterWindow.webContents.openDevTools();
 
   // In production, set the initial browser path to the local bundle generated
@@ -155,6 +175,13 @@ function createCutterWindow() {
 
   cutterWindow.on("close", function (e) {
     e.preventDefault();
+
+    const place = JSON.stringify([
+      ...cutterWindow.getPosition(),
+      ...cutterWindow.getSize(),
+    ]);
+
+    store.set("cutter", place);
     cutterWindow.hide();
   });
 }
@@ -241,7 +268,7 @@ function createAppWindow() {
     resizable: true,
   });
 
-  const pos = JSON.parse(store.get(encodeURIComponent(url)) || "{}");
+  const pos = JSON.parse(store.get("app") || "{}");
 
   if (Array.isArray(pos)) {
     appWindow.setPosition(pos[0], pos[1]);
@@ -352,7 +379,7 @@ const createScreenShotWindow = () => {
   });
 
   ipcMain.on("hidemain", () => {
-    cutterWindow.hide();
+    cutterWindow.close();
   });
 
   ipcMain.on("pinme", (event) => {
@@ -374,7 +401,7 @@ const createScreenShotWindow = () => {
   });
 
   ipcMain.on("hideshowmain", () => {
-    cutterWindow.hide();
+    cutterWindow.close();
     appWindow.show();
   });
 
@@ -463,7 +490,7 @@ const createScreenShotWindow = () => {
   });
 
   ipcMain.on("closehelp", (event) => {
-    helpWindow.hide();
+    helpWindow.close();
   });
 
   // screenShotterWindow.webContents.openDevTools();
