@@ -44,7 +44,8 @@
     "electron:start": "concurrently -k \"cross-env BROWSER=none npm start\" \"wait-on http://localhost:3000 && electronmon .\"",
     "electron:package:mac": "npm run build && electron-builder -m -c.extraMetadata.main=build/electron.js",
     "electron:package:win": "npm run build && electron-builder -w -c.extraMetadata.main=build/electron.js",
-    "electron:package:linux": "npm run build && electron-builder -l -c.extraMetadata.main=build/electron.js"
+    "electron:package:linux": "npm run build && electron-builder -l -c.extraMetadata.main=build/electron.js",
+    "publish": "electron-builder --win -p always"
   },
   "eslintConfig": {
     "extends": [
@@ -73,6 +74,13 @@
     "appId": "com.iniscreen.app",
     "productName": "IniNotes",
     "afterSign": "scripts/notarize.js",
+    "publish": [
+      {
+        "provider": "github",
+        "owner": "pbackup12345",
+        "repo": "iniscreentry"
+      }
+    ],
     "files": [
       "build/**/*",
       "node_modules/**/*"
@@ -100,6 +108,7 @@
       "entitlementsInherit": "build/entitlements.mac.plist"
     },
     "win": {
+      "certificateSubjectName": "NetEnglish Solutions O� Hungarian Permanent Establishment",
       "target": "nsis"
     },
     "linux": {
