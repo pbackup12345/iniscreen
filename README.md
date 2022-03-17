@@ -44,3 +44,5 @@ You don’t have to ever use `eject`. The curated feature set is suitable for sm
 You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
 
 To learn React, check out the [React documentation](https://reactjs.org/).
+
+signtool sign /n "NetEnglish Solutions OÜ Hungarian Permanent Establishment" /t "http://time.certum.pl" /fd sha1 /v "c:\documents\iniscreen\dist\IniNotes Setup 1.0.0.exe"
