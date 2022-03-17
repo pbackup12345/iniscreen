@@ -35,7 +35,7 @@ let helpWindow;
 
 let myViewers = [];
 
-const grandom = 78;
+const grandom = 79;
 
 let appIcon = nativeImage.createFromPath(
   path.join(__dirname, "logo32Template@2x.png")
@@ -138,7 +138,7 @@ function createCutterWindow() {
     },
   });
 
-  // cutterWindow.webContents.openDevTools();
+  cutterWindow.webContents.openDevTools();
 
   // In production, set the initial browser path to the local bundle generated
   // by the Create React App build process.
@@ -228,6 +228,7 @@ function createAppWindow() {
     y: 24,
     frame: false,
     acceptFirstMouse: true,
+    backgroundColor: "#333333",
 
     // Set the path of an additional "preload" script that can be used to
     // communicate between node-land and browser-land.
@@ -240,11 +241,18 @@ function createAppWindow() {
     resizable: true,
   });
 
+  const pos = JSON.parse(store.get(encodeURIComponent(url)) || "{}");
+
+  if (Array.isArray(pos)) {
+    appWindow.setPosition(pos[0], pos[1]);
+    appWindow.setSize(pos[2], pos[3]);
+  }
+
   // appWindow.webContents.session.clearCache();
 
-  appWindow.on("ready-to-show", () => {
-    appWindow.show();
-  });
+  //appWindow.on("ready-to-show", () => {
+  appWindow.show();
+  //});
 
   appWindow.webContents.openDevTools();
 
@@ -280,6 +288,13 @@ function createAppWindow() {
       title: "IniNotes...",
       content: "You can always open IniNotes by clicking on its icon here.",
     });
+
+    const place = JSON.stringify([
+      ...appWindow.getPosition(),
+      ...appWindow.getSize(),
+    ]);
+
+    store.set("app", place);
 
     setTimeout(() => {
       tray.removeBalloon();
