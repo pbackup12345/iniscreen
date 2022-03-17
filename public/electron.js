@@ -191,7 +191,7 @@ function createViewerWindow(url) {
   viewerWindow.focus();
   viewerWindow.on("ready-to-show", () => {});
 
-  viewerWindow.webContents.openDevTools();
+  //viewerWindow.webContents.openDevTools();
 
   viewerWindow.on("close", (e) => {
     const thisSender = myViewers.find(
@@ -254,7 +254,7 @@ function createAppWindow() {
   appWindow.show();
   //});
 
-  appWindow.webContents.openDevTools();
+  //appWindow.webContents.openDevTools();
 
   // In production, set the initial browser path to the local bundle generated
   // by the Create React App build process.
@@ -298,7 +298,7 @@ function createAppWindow() {
 
     setTimeout(() => {
       tray.removeBalloon();
-    }, 3000);
+    }, 7000);
   });
 }
 
