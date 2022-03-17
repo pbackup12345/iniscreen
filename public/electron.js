@@ -17,6 +17,10 @@ const {
   openSystemPreferences,
 } = require("mac-screen-capture-permissions");
 
+const Store = require("electron-store");
+
+const store = new Store();
+
 const path = require("path");
 const screenshotDesktop = require("screenshot-desktop");
 
@@ -31,7 +35,7 @@ let helpWindow;
 
 let myViewers = [];
 
-const grandom = 56;
+const grandom = 78;
 
 let appIcon = nativeImage.createFromPath(
   path.join(__dirname, "logo32Template@2x.png")
@@ -76,6 +80,7 @@ function createHelpWindow() {
     frame: false,
     skipTaskbar: true,
     maximizable: false,
+    acceptFirstMouse: true,
 
     fullscreenable: false,
     minimizable: false,
@@ -123,6 +128,7 @@ function createCutterWindow() {
     frame: false,
     skipTaskbar: true,
     maximizable: false,
+    acceptFirstMouse: true,
 
     fullscreenable: false,
     minimizable: false,
@@ -174,10 +180,18 @@ function createViewerWindow(url) {
     resizable: true,
   });
 
+  const pos = JSON.parse(store.get(encodeURIComponent(url)) || "{}");
+
+  if (Array.isArray(pos)) {
+    viewerWindow.setPosition(pos[0], pos[1]);
+    viewerWindow.setSize(pos[2], pos[3]);
+  }
+
   viewerWindow.show();
+  viewerWindow.focus();
   viewerWindow.on("ready-to-show", () => {});
 
-  // viewerWindow.webContents.openDevTools();
+  viewerWindow.webContents.openDevTools();
 
   viewerWindow.on("close", (e) => {
     const thisSender = myViewers.find(
@@ -226,16 +240,18 @@ function createAppWindow() {
     resizable: true,
   });
 
+  // appWindow.webContents.session.clearCache();
+
   appWindow.on("ready-to-show", () => {
     appWindow.show();
   });
 
-  // appWindow.webContents.openDevTools();
+  appWindow.webContents.openDevTools();
 
   // In production, set the initial browser path to the local bundle generated
   // by the Create React App build process.
   // In development, set it to localhost to allow live/hot-reloading.
-  const appURL = "https://app.ininotes.com?a=" + grandom;
+  const appURL = "https://app.ininotes.com/app/library?a=" + grandom;
 
   appWindow.loadURL(appURL);
   // cutterWindow.loadURL(appURL);
@@ -413,6 +429,8 @@ const createScreenShotWindow = () => {
       (item) => item.webContents.id === event.sender.id
     );
 
+    const myItem = myViewers.find((item) => item.id === event.sender.id);
+
     if (data.force) {
       myViewers = myViewers.map((item) =>
         item.id === event.sender.id
@@ -420,6 +438,12 @@ const createScreenShotWindow = () => {
           : { ...item }
       );
     }
+    const place = JSON.stringify([
+      ...myWindow.getPosition(),
+      ...myWindow.getSize(),
+    ]);
+    store.set(encodeURIComponent(myItem.url), place);
+
     myWindow.close();
   });
 
