@@ -225,7 +225,7 @@ function createViewerWindow(url) {
       (item) => item.id === viewerWindow.webContents.id
     );
 
-    if (thisSender.isChanged) {
+    if (thisSender && thisSender.isChanged) {
       e.preventDefault();
       viewerWindow.webContents.postMessage("closeasksave", {});
       return;
@@ -260,7 +260,7 @@ function createAppWindow() {
     // Set the path of an additional "preload" script that can be used to
     // communicate between node-land and browser-land.
     show: false,
-    skipTaskbar: true,
+    skipTaskbar: false,
     webPreferences: {
       preload: path.join(__dirname, "preloadmain.js"),
       sandbox: true,
@@ -281,7 +281,7 @@ function createAppWindow() {
   appWindow.show();
   //});
 
-  //appWindow.webContents.openDevTools();
+  appWindow.webContents.openDevTools();
 
   // In production, set the initial browser path to the local bundle generated
   // by the Create React App build process.
@@ -400,8 +400,44 @@ const createScreenShotWindow = () => {
     myWindow.minimize();
   });
 
+  ipcMain.on("tryclosing", () => {
+    const changedViewers = myViewers.filter((item) => item.isChanged);
+
+    const allWindows = BrowserWindow.getAllWindows();
+
+    if (changedViewers.length) {
+      changedViewers.forEach((viewer) => {
+        const myWindow = allWindows.find(
+          (window) => window.webContents.id === viewer.id
+        );
+
+        myWindow.show();
+
+        myWindow.webContents.postMessage("closeasksave", {});
+      });
+    } else {
+      myViewers.forEach((item) => {
+        const myWindow = allWindows.find(
+          (window) => window.webContents.id === item.id
+        );
+
+        console.log(item.id);
+        myWindow.close();
+      });
+
+      appWindow.show();
+      appWindow.focus();
+      appWindow.webContents.postMessage("logout", {});
+    }
+  });
+
   ipcMain.on("hideshowmain", () => {
-    cutterWindow.close();
+    BrowserWindow.getAllWindows().forEach((item) => {
+      if (item !== appWindow) {
+        item.close();
+      }
+    });
+
     appWindow.show();
   });
 
