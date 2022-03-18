@@ -17,6 +17,19 @@ const {
   openSystemPreferences,
 } = require("mac-screen-capture-permissions");
 
+function callBeforeQuitAndInstall() {
+  try {
+    if (tray) tray = null;
+    app.removeAllListeners("window-all-closed");
+    var browserWindows = BrowserWindow.getAllWindows();
+    browserWindows.forEach(function (browserWindow) {
+      browserWindow.removeAllListeners("close");
+    });
+  } catch (e) {
+    console.log(e);
+  }
+}
+
 const { autoUpdater } = require("electron-updater");
 
 const Store = require("electron-store");
@@ -61,6 +74,7 @@ autoUpdater.on("update-downloaded", () => {
     progressBar.close();
   }
   autoUpdater.logger.info("cihi");
+  callBeforeQuitAndInstall();
   autoUpdater.quitAndInstall();
 });
 
