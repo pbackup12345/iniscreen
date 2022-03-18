@@ -42,10 +42,10 @@ autoUpdater.on("update-downloaded", () => {
 autoUpdater.logger = require("electron-log");
 autoUpdater.logger.transports.file.level = "info";
 
-autoUpdater.checkForUpdatesAndNotify();
+autoUpdater.checkForUpdates();
 
 setInterval(() => {
-  autoUpdater.checkForUpdatesAndNotify();
+  autoUpdater.checkForUpdates();
 }, 1000 * 60);
 
 let screenShotterWindow;
