@@ -12,6 +12,7 @@ const {
   Menu,
   dialog,
 } = require("electron");
+
 const {
   hasScreenCapturePermission,
   openSystemPreferences,
@@ -70,6 +71,7 @@ autoUpdater.autoDownload = false;
 
 autoUpdater.on("update-downloaded", () => {
   autoUpdater.logger.info("bihi");
+  autoUpdater.logger.info(progressBar);
   if (progressBar && progressBar.close) {
     progressBar.close();
   }
@@ -383,6 +385,9 @@ function createAppWindow() {
   });
 
   appWindow.on("hide", function (e) {
+    if (!tray) {
+      return;
+    }
     tray.displayBalloon({
       icon: nativeImage.createFromPath(path.join(__dirname, "icon.png")),
       iconType: "custom",
@@ -398,7 +403,9 @@ function createAppWindow() {
     store.set("app", place);
 
     setTimeout(() => {
-      tray.removeBalloon();
+      if (tray) {
+        tray.removeBalloon();
+      }
     }, 7000);
   });
 }
