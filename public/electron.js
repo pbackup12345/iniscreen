@@ -438,29 +438,35 @@ const createScreenShotWindow = () => {
   });
 
   ipcMain.on("downloadupdate", () => {
-    autoUpdater.downloadUpdate();
+    autoUpdater
+      .downloadUpdate()
+      .then(() => {
+        BrowserWindow.getAllWindows().forEach((window) => window.hide());
 
-    BrowserWindow.getAllWindows().forEach((window) => window.hide());
+        progressBar = new ProgressBar({
+          indeterminate: false,
+          text: "Downloading updates...",
+          detail: "Wait...",
+          maxValue: 100,
+        });
 
-    progressBar = new ProgressBar({
-      indeterminate: false,
-      text: "Downloading updates...",
-      detail: "Wait...",
-      maxValue: 100,
-    });
+        autoUpdater.on(
+          "download-progress",
+          (event) => (progressBar.value = event.percent)
+        );
 
-    autoUpdater.on(
-      "download-progress",
-      (event) => (progressBar.value = event.percent)
-    );
-
-    progressBar
-      .on("completed", function () {
-        console.info(`completed...`);
-        progressBar.detail = "Task completed. Exiting...";
+        progressBar
+          .on("completed", function () {
+            console.info(`completed...`);
+            progressBar.detail = "Task completed. Exiting...";
+          })
+          .on("aborted", function (value) {
+            console.info(`aborted... ${value}`);
+          });
       })
-      .on("aborted", function (value) {
-        console.info(`aborted... ${value}`);
+      .catch(() => {
+        progressBar.close();
+        autoUpdater.quitAndInstall();
       });
   });
 
