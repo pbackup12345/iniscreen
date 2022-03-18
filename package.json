@@ -47,7 +47,8 @@
     "electron:package:mac": "npm run build && electron-builder -m -c.extraMetadata.main=build/electron.js",
     "electron:package:win": "npm run build && electron-builder -w -c.extraMetadata.main=build/electron.js",
     "electron:package:linux": "npm run build && electron-builder -l -c.extraMetadata.main=build/electron.js",
-    "publish": "npm run build && electron-builder --win -p always -c.extraMetadata.main=build/electron.js"
+    "publish": "npm run build && electron-builder --win -p always -c.extraMetadata.main=build/electron.js",
+    "publishmac": "npm run build && electron-builder --mac -p always -c.extraMetadata.main=build/electron.js"
   },
   "eslintConfig": {
     "extends": [
