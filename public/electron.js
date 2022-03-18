@@ -56,11 +56,16 @@ if (!gotTheLock) {
 autoUpdater.autoDownload = false;
 
 autoUpdater.on("update-downloaded", () => {
-  progressBar.close();
+  autoUpdater.logger.info("bihi");
+  if (progressBar && progressBar.close) {
+    progressBar.close();
+  }
+  autoUpdater.logger.info("cihi");
   autoUpdater.quitAndInstall();
 });
 
 autoUpdater.on("update-available", () => {
+  autoUpdater.logger.info("caha");
   appWindow.webContents.postMessage("updatenow", {});
 });
 
@@ -438,34 +443,35 @@ const createScreenShotWindow = () => {
   });
 
   ipcMain.on("downloadupdate", () => {
+    autoUpdater.on(
+      "download-progress",
+      (event) => (progressBar.value = event.percent)
+    );
+
+    progressBar = new ProgressBar({
+      indeterminate: false,
+      text: "Downloading updates...",
+      detail: "Wait...",
+      maxValue: 100,
+    });
+
+    progressBar
+      .on("completed", function () {
+        console.info(`completed...`);
+        progressBar.detail = "Task completed. Exiting...";
+      })
+      .on("aborted", function (value) {
+        console.info(`aborted... ${value}`);
+      });
+
     autoUpdater
       .downloadUpdate()
       .then(() => {
+        autoUpdater.logger.info("aha");
         BrowserWindow.getAllWindows().forEach((window) => window.hide());
-
-        progressBar = new ProgressBar({
-          indeterminate: false,
-          text: "Downloading updates...",
-          detail: "Wait...",
-          maxValue: 100,
-        });
-
-        autoUpdater.on(
-          "download-progress",
-          (event) => (progressBar.value = event.percent)
-        );
-
-        progressBar
-          .on("completed", function () {
-            console.info(`completed...`);
-            progressBar.detail = "Task completed. Exiting...";
-          })
-          .on("aborted", function (value) {
-            console.info(`aborted... ${value}`);
-          });
       })
       .catch(() => {
-        progressBar.close();
+        autoUpdater.logger.info("baha");
         autoUpdater.quitAndInstall();
       });
   });
@@ -872,6 +878,10 @@ app.whenReady().then(async () => {
       myWindow.show();
       myWindow.close();
       return;
+    }
+
+    if (progressBar && progressBar.close) {
+      progressBar.close();
     }
 
     BrowserWindow.getAllWindows().forEach((window) =>
