@@ -35,6 +35,10 @@ const sendStatusToWindow = (ini) => {
   });
 };
 
+autoUpdater.on("update-downloaded", () => {
+  appWindow.webContents.postMessage("updatenow", {});
+});
+
 autoUpdater.logger = require("electron-log");
 autoUpdater.logger.transports.file.level = "info";
 

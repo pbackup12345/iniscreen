@@ -18,4 +18,8 @@ contextBridge.exposeInMainWorld("myApiMain", {
     // Deliberately strip event as it includes `sender`
     ipcRenderer.on("logout", (event, ...args) => fn(...args));
   },
+  onUpdate: (fn) => {
+    // Deliberately strip event as it includes `sender`
+    ipcRenderer.on("updatenow", (event, ...args) => fn(...args));
+  },
 });
