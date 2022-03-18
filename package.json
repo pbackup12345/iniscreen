@@ -1,6 +1,6 @@
 {
   "name": "iniscreen",
-  "version": "1.0.0",
+  "version": "1.0.21",
   "private": true,
   "homepage": "./",
   "main": "./public/electron.js",
@@ -18,7 +18,9 @@
     "@types/styled-components": "^5.1.23",
     "electron-builder-notarize": "^1.4.0",
     "electron-json-storage": "^4.5.0",
+    "electron-log": "^4.4.6",
     "electron-store": "^8.0.1",
+    "electron-updater": "^4.6.5",
     "interactjs": "^1.10.11",
     "mac-screen-capture-permissions": "^1.1.0",
     "path-browserify": "^1.0.1",
@@ -45,7 +47,7 @@
     "electron:package:mac": "npm run build && electron-builder -m -c.extraMetadata.main=build/electron.js",
     "electron:package:win": "npm run build && electron-builder -w -c.extraMetadata.main=build/electron.js",
     "electron:package:linux": "npm run build && electron-builder -l -c.extraMetadata.main=build/electron.js",
-    "publish": "electron-builder --win -p always"
+    "publish": "npm run build && electron-builder --win -p always -c.extraMetadata.main=build/electron.js"
   },
   "eslintConfig": {
     "extends": [
@@ -108,7 +110,11 @@
       "entitlementsInherit": "build/entitlements.mac.plist"
     },
     "win": {
-      "certificateSubjectName": "NetEnglish Solutions O� Hungarian Permanent Establishment",
+      "certificateSha1": "6F8C867F8487586687E2DB94CE2639037D7686BF",
+      "publisherName": [
+        "NetEnglish Solutions O� Hungarian Permanent Establishment",
+        "NetEnglish Solutions OÜ Hungarian Permanent Establishment"
+      ],
       "target": "nsis"
     },
     "linux": {

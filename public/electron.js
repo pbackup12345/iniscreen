@@ -17,6 +17,8 @@ const {
   openSystemPreferences,
 } = require("mac-screen-capture-permissions");
 
+const { autoUpdater } = require("electron-updater");
+
 const Store = require("electron-store");
 
 const store = new Store();
@@ -25,6 +27,22 @@ const path = require("path");
 const screenshotDesktop = require("screenshot-desktop");
 
 const url = require("url");
+
+const sendStatusToWindow = (ini) => {
+  dialog.showMessageBox({
+    title: `Permission for Screenshots...`,
+    message: ini,
+  });
+};
+
+autoUpdater.logger = require("electron-log");
+autoUpdater.logger.transports.file.level = "info";
+
+autoUpdater.checkForUpdatesAndNotify();
+
+setInterval(() => {
+  autoUpdater.checkForUpdatesAndNotify();
+}, 1000 * 60);
 
 let screenShotterWindow;
 let titlebar;
