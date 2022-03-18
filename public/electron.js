@@ -28,14 +28,39 @@ const screenshotDesktop = require("screenshot-desktop");
 
 const url = require("url");
 
-const sendStatusToWindow = (ini) => {
-  dialog.showMessageBox({
-    title: `Permission for Screenshots...`,
-    message: ini,
-  });
-};
+let appWindow;
+
+const gotTheLock = app.requestSingleInstanceLock();
+
+if (!gotTheLock) {
+  app.quit();
+} else {
+  app.on(
+    "second-instance",
+    (event, commandLine, workingDirectory, additionalData) => {
+      // Print out data received from the second instance.
+
+      // Someone tried to run a second instance, we should focus our window.
+      if (appWindow) {
+        appWindow.show();
+        if (appWindow.isMinimized()) appWindow.restore();
+        appWindow.focus();
+      }
+    }
+  );
+}
+
+autoUpdater.autoDownload = false;
 
 autoUpdater.on("update-downloaded", () => {
+  autoUpdater.quitAndInstall();
+});
+
+autoUpdater.on("update-downloaded", () => {
+  autoUpdater.quitAndInstall();
+});
+
+autoUpdater.on("update-available", () => {
   appWindow.webContents.postMessage("updatenow", {});
 });
 
@@ -51,7 +76,7 @@ setInterval(() => {
 let screenShotterWindow;
 let titlebar;
 let cutterWindow;
-let appWindow;
+
 let tray;
 let helpWindow;
 
@@ -402,6 +427,10 @@ const createScreenShotWindow = () => {
 
   ipcMain.on("hidemain", () => {
     cutterWindow.close();
+  });
+
+  ipcMain.on("downloadupdate", () => {
+    autoUpdater.downloadUpdate();
   });
 
   ipcMain.on("pinme", (event) => {

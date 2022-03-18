@@ -13,6 +13,7 @@ contextBridge.exposeInMainWorld("myApiMain", {
   hideApp: () => ipcRenderer.send("hideapp", {}),
   showClipboard: () => ipcRenderer.send("showclip", {}),
   tryLogout: () => ipcRenderer.send("tryclosing", {}),
+  downloadUpdate: () => ipcRenderer.send("downloadupdate", {}),
   showHelp: (code) => ipcRenderer.send("showhelptopic", { code: code }),
   onLogout: (fn) => {
     // Deliberately strip event as it includes `sender`
