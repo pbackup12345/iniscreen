@@ -23,4 +23,8 @@ contextBridge.exposeInMainWorld("myApiMain", {
     // Deliberately strip event as it includes `sender`
     ipcRenderer.on("updatenow", (event, ...args) => fn(...args));
   },
+  onChangeUnsaved: (fn) => {
+    // Deliberately strip event as it includes `sender`
+    ipcRenderer.on("changeunsaved", (event, ...args) => fn(...args));
+  },
 });

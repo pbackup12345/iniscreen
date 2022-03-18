@@ -27,6 +27,9 @@ const path = require("path");
 const screenshotDesktop = require("screenshot-desktop");
 
 const url = require("url");
+const ProgressBar = require("electron-progressbar");
+
+let progressBar;
 
 let appWindow;
 
@@ -53,10 +56,7 @@ if (!gotTheLock) {
 autoUpdater.autoDownload = false;
 
 autoUpdater.on("update-downloaded", () => {
-  autoUpdater.quitAndInstall();
-});
-
-autoUpdater.on("update-downloaded", () => {
+  progressBar.close();
   autoUpdater.quitAndInstall();
 });
 
@@ -235,8 +235,8 @@ function createCutterWindow() {
 
 function createViewerWindow(url) {
   const viewerWindow = new BrowserWindow({
-    width: 900,
-    height: 700,
+    width: 700,
+    height: 600,
     x: 70,
     y: 70,
     frame: false,
@@ -265,7 +265,7 @@ function createViewerWindow(url) {
   viewerWindow.focus();
   viewerWindow.on("ready-to-show", () => {});
 
-  //viewerWindow.webContents.openDevTools();
+  viewerWindow.webContents.openDevTools();
 
   viewerWindow.on("close", (e) => {
     const thisSender = myViewers.find(
@@ -281,6 +281,14 @@ function createViewerWindow(url) {
     myViewers = myViewers.filter(
       (item) => item.id !== viewerWindow.webContents.id
     );
+
+    appWindow.webContents.postMessage("changeunsaved", { unsaved: myViewers });
+
+    viewerWindow.removeAllListeners();
+    viewerWindow.webContents.removeAllListeners();
+    viewerWindow.close();
+
+    console.log(thisSender);
 
     updateContextMenu();
   });
@@ -431,6 +439,29 @@ const createScreenShotWindow = () => {
 
   ipcMain.on("downloadupdate", () => {
     autoUpdater.downloadUpdate();
+
+    BrowserWindow.getAllWindows().forEach((window) => window.hide());
+
+    progressBar = new ProgressBar({
+      indeterminate: false,
+      text: "Downloading updates...",
+      detail: "Wait...",
+      maxValue: 100,
+    });
+
+    autoUpdater.on(
+      "download-progress",
+      (event) => (progressBar.value = event.percent)
+    );
+
+    progressBar
+      .on("completed", function () {
+        console.info(`completed...`);
+        progressBar.detail = "Task completed. Exiting...";
+      })
+      .on("aborted", function (value) {
+        console.info(`aborted... ${value}`);
+      });
   });
 
   ipcMain.on("pinme", (event) => {
@@ -451,7 +482,7 @@ const createScreenShotWindow = () => {
     myWindow.minimize();
   });
 
-  ipcMain.on("tryclosing", () => {
+  const tryClosing = () => {
     const changedViewers = myViewers.filter((item) => item.isChanged);
 
     const allWindows = BrowserWindow.getAllWindows();
@@ -467,6 +498,14 @@ const createScreenShotWindow = () => {
         myWindow.webContents.postMessage("closeasksave", {});
       });
     } else {
+      return true;
+    }
+  };
+
+  ipcMain.on("tryclosing", () => {
+    if (tryClosing()) {
+      const allWindows = BrowserWindow.getAllWindows();
+
       myViewers.forEach((item) => {
         const myWindow = allWindows.find(
           (window) => window.webContents.id === item.id
@@ -538,6 +577,8 @@ const createScreenShotWindow = () => {
       url: data.url,
       title: newWindow.title,
     });
+    appWindow.webContents.postMessage("changeunsaved", { unsaved: myViewers });
+
     updateContextMenu();
   });
 
@@ -554,21 +595,24 @@ const createScreenShotWindow = () => {
 
       helpWindow.loadURL(appURL);
 
-      const appURLCutter = "https://app.ininotes.com/app/clipper/?a=" + grandom;
+      // const appURLCutter = "https://app.ininotes.com/app/clipper/?a=" + grandom;
 
-      cutterWindow.loadURL(appURLCutter);
+      // cutterWindow.loadURL(appURLCutter);
+
+      const allWindows = BrowserWindow.getAllWindows();
+
+      console.log("me");
+
+      myViewers = myViewers.map((item) => ({ ...item, isChanged: false }));
 
       myViewers.forEach((webItem) => {
-        const myWindow = BrowserWindow.getAllWindows().find(
+        const myWindow = allWindows.find(
           (item) => item.webContents.id === webItem.id
         );
 
-        myWindow.loadURL(
-          "https://app.ininotes.com/app/beditor?id=" +
-            webItem.url +
-            "%2f&a=" +
-            grandom
-        );
+        console.log(webItem.id);
+
+        myWindow.close();
       });
     }
 
@@ -585,6 +629,8 @@ const createScreenShotWindow = () => {
         ? { ...item, isChanged: data.isChanged }
         : { ...item }
     );
+
+    appWindow.webContents.postMessage("changeunsaved", { unsaved: myViewers });
   });
 
   ipcMain.on("closeview", (event, data) => {

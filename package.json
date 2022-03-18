@@ -1,6 +1,6 @@
 {
   "name": "iniscreen",
-  "version": "1.0.29",
+  "version": "1.0.39",
   "private": true,
   "homepage": "./",
   "main": "./public/electron.js",
@@ -19,6 +19,7 @@
     "electron-builder-notarize": "^1.4.0",
     "electron-json-storage": "^4.5.0",
     "electron-log": "^4.4.6",
+    "electron-progressbar": "^2.0.1",
     "electron-store": "^8.0.1",
     "electron-updater": "^4.6.5",
     "interactjs": "^1.10.11",
