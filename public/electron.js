@@ -484,11 +484,12 @@ const createScreenShotWindow = () => {
         console.info(`aborted... ${value}`);
       });
 
+    BrowserWindow.getAllWindows().forEach((window) => window.hide());
+
     autoUpdater
       .downloadUpdate()
       .then(() => {
         autoUpdater.logger.info("aha");
-        BrowserWindow.getAllWindows().forEach((window) => window.hide());
       })
       .catch(() => {
         autoUpdater.logger.info("baha");
