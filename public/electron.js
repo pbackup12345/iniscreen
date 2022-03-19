@@ -11,6 +11,7 @@ const {
   Tray,
   Menu,
   dialog,
+  nativeTheme,
 } = require("electron");
 
 const {
@@ -30,6 +31,14 @@ function callBeforeQuitAndInstall() {
     console.log(e);
   }
 }
+
+nativeTheme.on("updated", () => {
+  if (process.platform !== "darwin") {
+    tray.setImage(
+      nativeTheme.shouldUseDarkColors ? appIconWinWhite : appIconWinDark
+    );
+  }
+});
 
 const { autoUpdater } = require("electron-updater");
 
@@ -105,8 +114,16 @@ let myViewers = [];
 
 let grandom = store.get("version") || 0;
 
-let appIcon = nativeImage.createFromPath(
+let appIconMac = nativeImage.createFromPath(
   path.join(__dirname, "logo32Template@2x.png")
+);
+
+let appIconWinWhite = nativeImage.createFromPath(
+  path.join(__dirname, "logotraywhite.png")
+);
+
+let appIconWinDark = nativeImage.createFromPath(
+  path.join(__dirname, "logotraydark.png")
 );
 
 const getScreenShotPermision = () => {
@@ -910,7 +927,13 @@ app.whenReady().then(async () => {
     );
   });
 
-  tray = new Tray(appIcon);
+  if (process.platform === "darwin") {
+    tray = new Tray(appIconMac);
+  } else {
+    tray = new Tray(
+      nativeTheme.shouldUseDarkColors ? appIconWinWhite : appIconWinDark
+    );
+  }
 
   tray.on("click", function () {
     tray.popUpContextMenu();
