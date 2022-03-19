@@ -404,12 +404,23 @@ function createAppWindow() {
     if (!tray) {
       return;
     }
-    tray.displayBalloon({
-      icon: nativeImage.createFromPath(path.join(__dirname, "icon.png")),
-      iconType: "custom",
-      title: "IniNotes...",
-      content: "You can always open IniNotes by clicking on its icon here.",
-    });
+
+    if (!store.get("notfirst")) {
+      tray.displayBalloon({
+        icon: nativeImage.createFromPath(path.join(__dirname, "icon.png")),
+        iconType: "custom",
+        title: "IniNotes...",
+        content: "You can always open IniNotes by clicking on its icon here.",
+      });
+
+      setTimeout(() => {
+        if (tray) {
+          tray.removeBalloon();
+        }
+      }, 20000);
+
+      store.set("notfirst", true);
+    }
 
     const place = JSON.stringify([
       ...appWindow.getPosition(),
@@ -417,12 +428,6 @@ function createAppWindow() {
     ]);
 
     store.set("app", place);
-
-    setTimeout(() => {
-      if (tray) {
-        tray.removeBalloon();
-      }
-    }, 7000);
   });
 }
 
