@@ -343,6 +343,8 @@ function createAppWindow() {
   appWindow = new BrowserWindow({
     width: 750,
     height: 700,
+    maxWidth: 750,
+    minWidth: 320,
     x: 24,
     y: 24,
     frame: false,
@@ -397,7 +399,7 @@ function createAppWindow() {
 
   appWindow.on("close", function (e) {
     e.preventDefault();
-    appWindow.hide();
+    appWindow.minimize();
   });
 
   appWindow.on("hide", function (e) {
@@ -469,7 +471,7 @@ const createScreenShotWindow = () => {
   });
 
   ipcMain.on("hideapp", () => {
-    appWindow.hide();
+    appWindow.minimize();
   });
 
   ipcMain.on("showclip", () => {
