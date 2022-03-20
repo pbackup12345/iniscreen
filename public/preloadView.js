@@ -9,6 +9,7 @@ const { contextBridge, ipcRenderer } = require("electron");
 contextBridge.exposeInMainWorld("myApiView", {
   closeMe: (force = false) => ipcRenderer.send("closeview", { force: force }),
   pinMe: () => ipcRenderer.send("pinme", {}),
+  openExternal: (url) => ipcRenderer.send("openext", { url: url }),
   minimizeMe: () => ipcRenderer.send("minimizeme", {}),
   changed: (isChanged) =>
     ipcRenderer.send("ischanged", { isChanged: isChanged }),

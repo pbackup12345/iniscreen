@@ -12,6 +12,7 @@ const {
   Menu,
   dialog,
   nativeTheme,
+  shell,
 } = require("electron");
 
 const {
@@ -532,6 +533,10 @@ const createScreenShotWindow = () => {
     }
   });
 
+  ipcMain.on("openext", (event, data) => {
+    shell.openExternal(data.url);
+  });
+
   ipcMain.on("minimizeme", (event) => {
     const myWindow = BrowserWindow.getAllWindows().find(
       (item) => item.webContents.id === event.sender.id
@@ -1004,6 +1009,7 @@ app.on("web-contents-created", (event, contents) => {
 
     if (!allowedNavigationDestinations.includes(parsedUrl.origin)) {
       event.preventDefault();
+      shell.openExternal(navigationUrl);
     }
   });
 });
