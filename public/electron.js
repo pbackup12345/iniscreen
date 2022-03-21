@@ -533,6 +533,14 @@ const createScreenShotWindow = () => {
     }
   });
 
+  ipcMain.on("pinclipboard", (event) => {
+    if (cutterWindow.isAlwaysOnTop()) {
+      cutterWindow.setAlwaysOnTop(false);
+    } else {
+      cutterWindow.setAlwaysOnTop(true);
+    }
+  });
+
   ipcMain.on("openext", (event, data) => {
     shell.openExternal(data.url);
   });
@@ -657,9 +665,9 @@ const createScreenShotWindow = () => {
 
       helpWindow.loadURL(appURL);
 
-      // const appURLCutter = "https://app.ininotes.com/app/clipper/?a=" + grandom;
+      const appURLCutter = "https://app.ininotes.com/app/clipper/?a=" + grandom;
 
-      // cutterWindow.loadURL(appURLCutter);
+      cutterWindow.loadURL(appURLCutter);
 
       const allWindows = BrowserWindow.getAllWindows();
 

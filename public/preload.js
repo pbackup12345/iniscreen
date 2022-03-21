@@ -14,6 +14,7 @@ contextBridge.exposeInMainWorld("myApi", {
     ipcRenderer.send("hidemain", {
       data,
     }),
+  pinMe: () => ipcRenderer.send("pinclipboard", {}),
   hideShowMain: (data) =>
     ipcRenderer.send("hideshowmain", {
       data,
