@@ -13,11 +13,18 @@ contextBridge.exposeInMainWorld("myApiMain", {
   hideApp: () => ipcRenderer.send("hideapp", {}),
   showClipboard: () => ipcRenderer.send("showclip", {}),
   tryLogout: () => ipcRenderer.send("tryclosing", {}),
+  validateShortcuts: () => ipcRenderer.send("validateshortcuts", {}),
+  tryRestart: () => ipcRenderer.send("tryrestart", {}),
   downloadUpdate: () => ipcRenderer.send("downloadupdate", {}),
   showHelp: (code) => ipcRenderer.send("showhelptopic", { code: code }),
+  setupShortcuts: (obj) => ipcRenderer.send("setupshortcuts", obj),
   onLogout: (fn) => {
     // Deliberately strip event as it includes `sender`
     ipcRenderer.on("logout", (event, ...args) => fn(...args));
+  },
+  onRestart: (fn) => {
+    // Deliberately strip event as it includes `sender`
+    ipcRenderer.on("restart", (event, ...args) => fn(...args));
   },
   onUpdate: (fn) => {
     // Deliberately strip event as it includes `sender`
@@ -26,5 +33,13 @@ contextBridge.exposeInMainWorld("myApiMain", {
   onChangeUnsaved: (fn) => {
     // Deliberately strip event as it includes `sender`
     ipcRenderer.on("changeunsaved", (event, ...args) => fn(...args));
+  },
+  onFindShortcuts: (fn) => {
+    // Deliberately strip event as it includes `sender`
+    ipcRenderer.on("findshortcuts", (event, ...args) => fn(...args));
+  },
+  onHotkeys: (fn) => {
+    // Deliberately strip event as it includes `sender`
+    ipcRenderer.on("validhotkeys", (event, ...args) => fn(...args));
   },
 });

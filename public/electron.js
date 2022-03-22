@@ -15,6 +15,10 @@ const {
   shell,
 } = require("electron");
 
+const electronLocalshortcut = require("electron-localshortcut");
+
+const shortcuts = {};
+
 const {
   hasScreenCapturePermission,
   openSystemPreferences,
@@ -216,7 +220,7 @@ function createCutterWindow() {
 
   cutterWindow = new BrowserWindow({
     width: 500,
-    height: Math.max(800, disp.bounds.height - 100),
+    height: Math.max(800, disp.bounds.height - 150),
     x: disp.bounds.width - 500,
     y: 24,
     maxWidth: 600,
@@ -235,6 +239,10 @@ function createCutterWindow() {
     webPreferences: {
       preload: path.join(__dirname, "preload.js"),
     },
+  });
+
+  electronLocalshortcut.register(cutterWindow, "Escape", () => {
+    cutterWindow.hide();
   });
 
   const pos = JSON.parse(store.get("cutter") || "{}");
@@ -581,13 +589,107 @@ const createScreenShotWindow = () => {
           (window) => window.webContents.id === item.id
         );
 
-        console.log(item.id);
         myWindow.close();
       });
 
       appWindow.show();
       appWindow.focus();
       appWindow.webContents.postMessage("logout", {});
+    }
+  });
+
+  ipcMain.on("validateshortcuts", () => {
+    const hotkeys = [
+      "CommandOrControl+F2",
+      "CommandOrControl+2",
+      "CommandOrControl+K",
+      "CommandOrControl+Shift+F2",
+      "CommandOrControl+Shift+2",
+      "CommandOrControl+Shift+K",
+    ];
+
+    const validHotkeys = [];
+
+    hotkeys.forEach((key) => {
+      let reg = globalShortcut.isRegistered(key);
+
+      if (reg) {
+        validHotkeys.push(key);
+      } else {
+        reg = globalShortcut.register(key, () => {});
+        if (reg) {
+          validHotkeys.push(key);
+          globalShortcut.unregister(key);
+        }
+      }
+    });
+
+    appWindow.webContents.postMessage("validhotkeys", {
+      validHotkeys: validHotkeys,
+    });
+  });
+
+  ipcMain.on("setupshortcuts", (e, data) => {
+    globalShortcut.unregisterAll();
+
+    shortcuts.screenshotShortcut =
+      data.screenshotShortcut || "CommandOrControl+Shift+F2";
+
+    globalShortcut.register(
+      data.screenshotShortcut || "CommandOrControl+Shift+F2",
+      async () => {
+        if (screenShotterWindow.isVisible()) {
+          return;
+        }
+        await showCutter();
+      }
+    );
+
+    shortcuts.clipboardShortcut =
+      data.clipboardShortcut || "CommandOrControl+F2";
+
+    globalShortcut.register(
+      data.clipboardShortcut || "CommandOrControl+F2",
+      async () => {
+        if (screenShotterWindow.isVisible()) {
+          return;
+        }
+        cutterWindow.show();
+      }
+    );
+    updateContextMenu();
+  });
+
+  ipcMain.on("tryrestart", () => {
+    if (tryClosing()) {
+      const allWindows = BrowserWindow.getAllWindows();
+
+      myViewers.forEach((item) => {
+        const myWindow = allWindows.find(
+          (window) => window.webContents.id === item.id
+        );
+
+        myWindow.close();
+      });
+
+      // cutterWindow.hide();
+      // helpWindow.hide();
+
+      const appURL =
+        "https://app.ininotes.com/help/help?i=" + grandom + Date.now();
+
+      console.log(appURL);
+
+      helpWindow.loadURL(appURL);
+
+      const appURLCutter =
+        "https://app.ininotes.com/app/clipper/?a=" + grandom + Date.now();
+
+      cutterWindow.loadURL(appURLCutter);
+
+      appWindow.show();
+      appWindow.focus();
+      appWindow.webContents.postMessage("restart", {});
     }
   });
 
@@ -825,7 +927,7 @@ const updateContextMenu = () => {
     {
       label: "Screenshot",
       type: "normal",
-      accelerator: "CommandOrControl+F2",
+      accelerator: shortcuts.screenshotShortcut || "",
       click: () => {
         showCutter();
       },
@@ -833,7 +935,7 @@ const updateContextMenu = () => {
     {
       label: "Clipboard",
       type: "normal",
-      accelerator: "F2",
+      accelerator: shortcuts.clipboardShortcut || "",
       click: () => {
         cutterWindow.show();
       },
@@ -970,20 +1072,6 @@ app.whenReady().then(async () => {
   createHelpWindow();
 
   setupLocalFilesNormalizerProxy();
-
-  globalShortcut.register("CommandOrControl+F2", async () => {
-    if (screenShotterWindow.isVisible()) {
-      return;
-    }
-    await showCutter();
-  });
-
-  globalShortcut.register("F2", async () => {
-    if (screenShotterWindow.isVisible()) {
-      return;
-    }
-    cutterWindow.show();
-  });
 
   app.on("activate", function () {
     // On macOS it's common to re-create a window in the app when the
