@@ -517,7 +517,7 @@ const createScreenShotWindow = () => {
         console.info(`aborted... ${value}`);
       });
 
-    BrowserWindow.getAllWindows().forEach((window) => window.hide());
+    // BrowserWindow.getAllWindows().forEach((window) => window.hide());
 
     autoUpdater
       .downloadUpdate()

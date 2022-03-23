@@ -124,7 +124,7 @@ const App = () => {
   });
 
   useEffect(() => {
-    interact("#selectwionx").resizable({
+    interact("#selectionwx").resizable({
       // resize from all edges and corners
       edges: { left: true, right: true, bottom: true, top: true },
 
@@ -174,16 +174,16 @@ const App = () => {
   }, []);
 
   const blurScreen = useCallback(() => {
-    moveStatus.current = {
-      status: 0,
-      startX: 0,
-      startY: 0,
-      endX: 0,
-      endY: 0,
-    };
-    positionSelection(false);
+    // moveStatus.current = {
+    //   status: 0,
+    //   startX: 0,
+    //   startY: 0,
+    //   endX: 0,
+    //   endY: 0,
+    // };
+    // positionSelection(false);
     setTexts([]);
-    setIsSelection(false);
+    // setIsSelection(false);
 
     paths.current = [];
 
@@ -328,24 +328,20 @@ const App = () => {
       newCanvas.height
     );
 
-    console.log(newCanvas);
-
     var data_url = newCanvas.toDataURL("image/png");
-
-    console.log(data_url);
 
     //@ts-ignore
 
     //@ts-ignore
     window.myApi.sendPicture(data_url);
-    moveStatus.current = {
-      status: 0,
-      startX: 0,
-      startY: 0,
-      endX: 0,
-      endY: 0,
-    };
-    positionSelection(false);
+    // moveStatus.current = {
+    //   status: 0,
+    //   startX: 0,
+    //   startY: 0,
+    //   endX: 0,
+    //   endY: 0,
+    // };
+    // positionSelection(false);
 
     return;
   };
