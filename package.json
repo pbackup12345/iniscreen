@@ -124,7 +124,10 @@
         "NetEnglish Solutions O� Hungarian Permanent Establishment",
         "NetEnglish Solutions OÜ Hungarian Permanent Establishment"
       ],
-      "target": "nsis"
+      "target": [
+        "nsis",
+        "appx"
+      ]
     },
     "linux": {
       "target": "deb"
@@ -132,5 +135,15 @@
   },
   "dmg": {
     "sign": false
+  },
+  "appx": {
+    "backgroundColor": "#464646",
+    "displayName": "IniNotes",
+    "identityName": "NetEnglishSolutionsOUHung.IniNotes",
+    "publisher": "NetEnglish Solutions OU Hungarian PE",
+    "publisherDisplayName": "NetEnglish Solutions OU Hungarian PE",
+    "languages": "en-US",
+    "showNameOnTiles": false,
+    "setBuildNumber": true
   }
 }
