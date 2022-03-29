@@ -311,7 +311,7 @@ function createViewerWindow(url) {
   viewerWindow.show();
   viewerWindow.focus();
 
-  viewerWindow.webContents.openDevTools();
+  // viewerWindow.webContents.openDevTools();
 
   viewerWindow.on("close", (e) => {
     const thisSender = myViewers.find(
