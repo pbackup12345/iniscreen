@@ -13,6 +13,7 @@ const {
   dialog,
   nativeTheme,
   shell,
+  desktopCapturer,
 } = require("electron");
 
 const electronLocalshortcut = require("electron-localshortcut");
@@ -52,7 +53,7 @@ const Store = require("electron-store");
 const store = new Store();
 
 const path = require("path");
-const screenshotDesktop = require("screenshot-desktop");
+// const screenshotDesktop = require("screenshot-desktop");
 
 const url = require("url");
 const ProgressBar = require("electron-progressbar");
@@ -252,7 +253,7 @@ function createCutterWindow() {
     cutterWindow.setSize(pos[2], pos[3]);
   }
 
-  cutterWindow.webContents.openDevTools();
+  // cutterWindow.webContents.openDevTools();
 
   // In production, set the initial browser path to the local bundle generated
   // by the Create React App build process.
@@ -678,8 +679,6 @@ const createScreenShotWindow = () => {
       const appURL =
         "https://app.ininotes.com/help/help?i=" + grandom + Date.now();
 
-      console.log(appURL);
-
       helpWindow.loadURL(appURL);
 
       const appURLCutter =
@@ -773,16 +772,12 @@ const createScreenShotWindow = () => {
 
       const allWindows = BrowserWindow.getAllWindows();
 
-      console.log("me");
-
       myViewers = myViewers.map((item) => ({ ...item, isChanged: false }));
 
       myViewers.forEach((webItem) => {
         const myWindow = allWindows.find(
           (item) => item.webContents.id === webItem.id
         );
-
-        console.log(webItem.id);
 
         myWindow.close();
       });
@@ -849,12 +844,19 @@ const showCutter = async () => {
 
   let img;
   try {
-    img = await screenshotDesktop();
+    const sources = await desktopCapturer.getSources({
+      types: ["screen"],
+      thumbnailSize: { width: 3000, height: 3000 },
+    });
+    img = sources[0].thumbnail.toPNG(); // The image to display the screenshot
 
-    if (!Buffer.isBuffer(img)) {
-      return;
-    }
+    // img = await screenshotDesktop();
+
+    // if (!Buffer.isBuffer(img)) {
+    // return;
+    // }
   } catch (e) {
+    console.log(e);
     return;
   }
 
