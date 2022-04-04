@@ -1,6 +1,6 @@
 {
   "name": "iniscreen",
-  "version": "1.0.162",
+  "version": "1.0.163",
   "private": true,
   "homepage": "./",
   "main": "./public/electron.js",
@@ -120,12 +120,7 @@
     },
     "win": {
       "target": [
-        "nsis"
-      ],
-      "certificateSha1": "6F8C867F8487586687E2DB94CE2639037D7686BF",
-      "publisherName": [
-        "NetEnglish Solutions O� Hungarian Permanent Establishment",
-        "NetEnglish Solutions OÜ Hungarian Permanent Establishment"
+        "appx"
       ]
     },
     "linux": {
