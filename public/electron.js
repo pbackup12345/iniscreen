@@ -980,6 +980,21 @@ function setupLocalFilesNormalizerProxy() {
 // is ready to create the browser windows.
 // Some APIs can only be used after this event occurs.
 app.whenReady().then(async () => {
+  console.log("bring");
+  let appInsights = require("applicationinsights");
+  appInsights.setup("4e30c59b-b19c-4e89-939f-b69e83fc2466").start();
+  let client = appInsights.defaultClient;
+
+  client.trackEvent({ name: "app loaded" });
+
+  const unhandled = require("electron-unhandled");
+  unhandled({
+    showDialog: false,
+    logger: (error) => {
+      client.trackException({ exception: error });
+    },
+  });
+
   if (process.platform === "darwin") {
     const template = [
       {

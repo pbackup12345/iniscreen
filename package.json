@@ -1,6 +1,6 @@
 {
   "name": "iniscreen",
-  "version": "1.0.162",
+  "version": "1.0.164",
   "private": true,
   "homepage": "./",
   "main": "./public/electron.js",
@@ -16,12 +16,14 @@
     "@types/react-color": "^3.0.6",
     "@types/react-dom": "^17.0.11",
     "@types/styled-components": "^5.1.23",
+    "applicationinsights": "^2.3.0",
     "electron-builder-notarize": "^1.4.0",
     "electron-json-storage": "^4.5.0",
     "electron-localshortcut": "^3.2.1",
     "electron-log": "^4.4.6",
     "electron-progressbar": "^2.0.1",
     "electron-store": "^8.0.1",
+    "electron-unhandled": "^4.0.1",
     "electron-updater": "^4.6.5",
     "interactjs": "^1.10.11",
     "mac-screen-capture-permissions": "^1.1.0",
@@ -120,12 +122,7 @@
     },
     "win": {
       "target": [
-        "nsis"
-      ],
-      "certificateSha1": "6F8C867F8487586687E2DB94CE2639037D7686BF",
-      "publisherName": [
-        "NetEnglish Solutions O� Hungarian Permanent Establishment",
-        "NetEnglish Solutions OÜ Hungarian Permanent Establishment"
+        "appx"
       ]
     },
     "linux": {
