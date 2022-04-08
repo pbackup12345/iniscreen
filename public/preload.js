@@ -23,4 +23,5 @@ contextBridge.exposeInMainWorld("myApi", {
     ipcRenderer.send("showmain", {
       data,
     }),
+  shotNowClipboard: () => ipcRenderer.send("shotnowclip", {}),
 });

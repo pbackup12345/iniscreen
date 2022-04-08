@@ -11,11 +11,16 @@ contextBridge.exposeInMainWorld("myApiView", {
   pinMe: () => ipcRenderer.send("pinme", {}),
   openExternal: (url) => ipcRenderer.send("openext", { url: url }),
   minimizeMe: () => ipcRenderer.send("minimizeme", {}),
+  shotNow: (code) => ipcRenderer.send("shotnow", { code: code }),
   changed: (isChanged) =>
     ipcRenderer.send("ischanged", { isChanged: isChanged }),
   showHelp: (code) => ipcRenderer.send("showhelptopic", { code: code }),
   onCloseAskSave: (fn) => {
     // Deliberately strip event as it includes `sender`
     ipcRenderer.on("closeasksave", (event, ...args) => fn(...args));
+  },
+  onPictureShot: (fn) => {
+    // Deliberately strip event as it includes `sender`
+    ipcRenderer.on("pictureshot", (event, ...args) => fn(...args));
   },
 });

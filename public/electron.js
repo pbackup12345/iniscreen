@@ -20,6 +20,8 @@ const electronLocalshortcut = require("electron-localshortcut");
 
 const shortcuts = {};
 
+let afterCut = null;
+
 const {
   hasScreenCapturePermission,
   openSystemPreferences,
@@ -288,7 +290,7 @@ function createViewerWindow(url) {
     x: 70,
     y: 70,
     frame: false,
-    acceptFirstMouse: true,
+    // acceptFirstMouse: true,
     backgroundColor: "#333333",
 
     // Set the path of an additional "preload" script that can be used to
@@ -478,6 +480,20 @@ const createScreenShotWindow = () => {
 
   ipcMain.on("hideme", () => {
     screenShotterWindow.hide();
+    if (afterCut !== "clipboard") {
+      const allWindows = BrowserWindow.getAllWindows();
+
+      const myWindow = allWindows.find(
+        (window) => window.webContents.id === afterCut
+      );
+
+      if (myWindow) {
+        myWindow.show();
+        myWindow.focus();
+      }
+    } else {
+      cutterWindow.show();
+    }
   });
 
   ipcMain.on("hideapp", () => {
@@ -561,6 +577,21 @@ const createScreenShotWindow = () => {
     myWindow.minimize();
   });
 
+  ipcMain.on("shotnowclip", async (event, data) => {
+    cutterWindow.minimize();
+    afterCut = "clipboard";
+    await showCutter();
+  });
+
+  ipcMain.on("shotnow", async (event, data) => {
+    const myWindow = BrowserWindow.getAllWindows().find(
+      (item) => item.webContents.id === event.sender.id
+    );
+    myWindow.minimize();
+    afterCut = event.sender.id;
+    await showCutter();
+  });
+
   const tryClosing = () => {
     const changedViewers = myViewers.filter((item) => item.isChanged);
 
@@ -642,6 +673,7 @@ const createScreenShotWindow = () => {
         if (screenShotterWindow.isVisible()) {
           return;
         }
+        afterCut = "clipboard";
         await showCutter();
       }
     );
@@ -717,14 +749,27 @@ const createScreenShotWindow = () => {
 
   ipcMain.on("picture", async (event, data) => {
     //eslint-disable-next-line
+    if (afterCut === "clipboard") {
+      const image = nativeImage.createFromDataURL(data);
+      clipboard.writeImage(image);
 
-    const image = nativeImage.createFromDataURL(data);
-    clipboard.writeImage(image);
+      //eslint-disable-next-line
 
-    //eslint-disable-next-line
+      screenShotterWindow.hide();
+      cutterWindow.show();
+    } else {
+      const allWindows = BrowserWindow.getAllWindows();
 
-    screenShotterWindow.hide();
-    cutterWindow.show();
+      const myWindow = allWindows.find(
+        (window) => window.webContents.id === afterCut
+      );
+
+      if (myWindow) {
+        myWindow.show();
+        myWindow.focus();
+        myWindow.webContents.postMessage("pictureshot", data);
+      }
+    }
   });
 
   ipcMain.on("openurl", (event, data) => {
@@ -932,6 +977,7 @@ const updateContextMenu = () => {
       accelerator: shortcuts.screenshotShortcut || "",
       click: () => {
         showCutter();
+        afterCut = "clipboard";
       },
     },
     {
