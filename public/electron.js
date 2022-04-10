@@ -161,12 +161,11 @@ function createHelpWindow() {
   const disp = screen.getPrimaryDisplay();
 
   helpWindow = new BrowserWindow({
-    width: 400,
+    width: 500,
     height: Math.max(800, disp.bounds.height - 300),
-    x: disp.bounds.width - 500,
+    x: disp.bounds.width - 550,
     y: 24,
-    maxWidth: 600,
-    minWidth: 300,
+    minWidth: 400,
 
     // Set the path of an additional "preload" script that can be used to
     // communicate between node-land and browser-land.
@@ -1026,20 +1025,20 @@ function setupLocalFilesNormalizerProxy() {
 // is ready to create the browser windows.
 // Some APIs can only be used after this event occurs.
 app.whenReady().then(async () => {
-  console.log("bring");
-  let appInsights = require("applicationinsights");
-  appInsights.setup("4e30c59b-b19c-4e89-939f-b69e83fc2466").start();
-  let client = appInsights.defaultClient;
+  // console.log("bring");
+  // let appInsights = require("applicationinsights");
+  // appInsights.setup("4e30c59b-b19c-4e89-939f-b69e83fc2466").start();
+  // let client = appInsights.defaultClient;
 
-  client.trackEvent({ name: "app loaded" });
+  // client.trackEvent({ name: "app loaded" });
 
-  const unhandled = require("electron-unhandled");
-  unhandled({
-    showDialog: false,
-    logger: (error) => {
-      client.trackException({ exception: error });
-    },
-  });
+  // const unhandled = require("electron-unhandled");
+  // unhandled({
+  //   showDialog: false,
+  //   logger: (error) => {
+  //     client.trackException({ exception: error });
+  //   },
+  // });
 
   if (process.platform === "darwin") {
     const template = [
