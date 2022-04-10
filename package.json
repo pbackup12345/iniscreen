@@ -1,6 +1,6 @@
 {
   "name": "iniscreen",
-  "version": "1.0.164",
+  "version": "1.0.167",
   "private": true,
   "homepage": "./",
   "main": "./public/electron.js",
