@@ -1,0 +1,102 @@
+[1mdiff --git a/package.json b/package.json[m
+[1mindex cd225b6..6e83629 100644[m
+[1m--- a/package.json[m
+[1m+++ b/package.json[m
+[36m@@ -1,6 +1,6 @@[m
+ {[m
+   "name": "iniscreen",[m
+[31m-  "version": "1.0.167",[m
+[32m+[m[32m  "version": "1.0.169",[m
+   "private": true,[m
+   "homepage": "./",[m
+   "main": "./public/electron.js",[m
+[1mdiff --git a/public/electron.js b/public/electron.js[m
+[1mindex eb903fd..41b716b 100644[m
+[1m--- a/public/electron.js[m
+[1m+++ b/public/electron.js[m
+[36m@@ -22,6 +22,9 @@[m [mconst shortcuts = {};[m
+ [m
+ let afterCut = null;[m
+ [m
+[32m+[m[32m//const baseUrl = "http://192.168.0.102:8100";[m
+[32m+[m[32mconst baseUrl = "https://app.ininotes.com";[m
+[32m+[m
+ const {[m
+   hasScreenCapturePermission,[m
+   openSystemPreferences,[m
+[36m@@ -194,7 +197,7 @@[m [mfunction createHelpWindow() {[m
+   // In production, set the initial browser path to the local bundle generated[m
+   // by the Create React App build process.[m
+   // In development, set it to localhost to allow live/hot-reloading.[m
+[31m-  const appURL = "https://app.ininotes.com/help/help?i=" + grandom;[m
+[32m+[m[32m  const appURL = baseUrl + "/help/help?i=" + grandom;[m
+ [m
+   helpWindow.loadURL(appURL);[m
+   // cutterWindow.loadURL(appURL);[m
+[36m@@ -259,7 +262,7 @@[m [mfunction createCutterWindow() {[m
+   // In production, set the initial browser path to the local bundle generated[m
+   // by the Create React App build process.[m
+   // In development, set it to localhost to allow live/hot-reloading.[m
+[31m-  const appURL = "https://app.ininotes.com";[m
+[32m+[m[32m  const appURL = baseUrl;[m
+ [m
+   cutterWindow.loadURL(appURL + "/app/clipper/?a=" + grandom);[m
+   // cutterWindow.loadURL(appURL);[m
+[36m@@ -341,9 +344,7 @@[m [mfunction createViewerWindow(url) {[m
+     updateContextMenu();[m
+   });[m
+ [m
+[31m-  viewerWindow.loadURL([m
+[31m-    "https://app.ininotes.com/app/beditor?id=" + url + "%2f&a=" + grandom[m
+[31m-  );[m
+[32m+[m[32m  viewerWindow.loadURL(baseUrl + "/app/beditor?id=" + url + "%2f&a=" + grandom);[m
+ [m
+   return viewerWindow;[m
+ }[m
+[36m@@ -391,7 +392,7 @@[m [mfunction createAppWindow() {[m
+   // In production, set the initial browser path to the local bundle generated[m
+   // by the Create React App build process.[m
+   // In development, set it to localhost to allow live/hot-reloading.[m
+[31m-  const appURL = "https://app.ininotes.com/app/library?a=" + grandom;[m
+[32m+[m[32m  const appURL = baseUrl + "/app/library?a=" + grandom;[m
+ [m
+   appWindow.loadURL(appURL);[m
+   // cutterWindow.loadURL(appURL);[m
+[36m@@ -707,13 +708,11 @@[m [mconst createScreenShotWindow = () => {[m
+       // cutterWindow.hide();[m
+       // helpWindow.hide();[m
+ [m
+[31m-      const appURL =[m
+[31m-        "https://app.ininotes.com/help/help?i=" + grandom + Date.now();[m
+[32m+[m[32m      const appURL = baseUrl + "/help/help?i=" + grandom + Date.now();[m
+ [m
+       helpWindow.loadURL(appURL);[m
+ [m
+[31m-      const appURLCutter =[m
+[31m-        "https://app.ininotes.com/app/clipper/?a=" + grandom + Date.now();[m
+[32m+[m[32m      const appURLCutter = baseUrl + "/app/clipper/?a=" + grandom + Date.now();[m
+ [m
+       cutterWindow.loadURL(appURLCutter);[m
+ [m
+[36m@@ -806,11 +805,11 @@[m [mconst createScreenShotWindow = () => {[m
+     grandom = version;[m
+ [m
+     if (version !== oldVersion && oldVersion) {[m
+[31m-      const appURL = "https://app.ininotes.com/help/help?i=" + grandom;[m
+[32m+[m[32m      const appURL = baseUrl + "/help/help?i=" + grandom;[m
+ [m
+       helpWindow.loadURL(appURL);[m
+ [m
+[31m-      const appURLCutter = "https://app.ininotes.com/app/clipper/?a=" + grandom;[m
+[32m+[m[32m      const appURLCutter = baseUrl + "/app/clipper/?a=" + grandom;[m
+ [m
+       cutterWindow.loadURL(appURLCutter);[m
+ [m
+[36m@@ -1157,6 +1156,7 @@[m [mapp.on("window-all-closed", function () {[m
+ // it is a good idea to limit navigation outright to that known scope,[m
+ // disallowing any other kinds of navigation.[m
+ const allowedNavigationDestinations = [[m
+[32m+[m[32m  baseUrl,[m
+   "https://app.ininotes.com",[m
+   "https://docs.google.com",[m
+   "https://drive.google.com",[m

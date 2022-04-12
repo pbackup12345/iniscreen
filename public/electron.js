@@ -22,6 +22,9 @@ const shortcuts = {};
 
 let afterCut = null;
 
+//const baseUrl = "http://192.168.0.102:8100";
+const baseUrl = "https://app.ininotes.com";
+
 const {
   hasScreenCapturePermission,
   openSystemPreferences,
@@ -194,7 +197,7 @@ function createHelpWindow() {
   // In production, set the initial browser path to the local bundle generated
   // by the Create React App build process.
   // In development, set it to localhost to allow live/hot-reloading.
-  const appURL = "https://app.ininotes.com/help/help?i=" + grandom;
+  const appURL = baseUrl + "/help/help?i=" + grandom;
 
   helpWindow.loadURL(appURL);
   // cutterWindow.loadURL(appURL);
@@ -259,7 +262,7 @@ function createCutterWindow() {
   // In production, set the initial browser path to the local bundle generated
   // by the Create React App build process.
   // In development, set it to localhost to allow live/hot-reloading.
-  const appURL = "https://app.ininotes.com";
+  const appURL = baseUrl;
 
   cutterWindow.loadURL(appURL + "/app/clipper/?a=" + grandom);
   // cutterWindow.loadURL(appURL);
@@ -341,9 +344,7 @@ function createViewerWindow(url) {
     updateContextMenu();
   });
 
-  viewerWindow.loadURL(
-    "https://app.ininotes.com/app/beditor?id=" + url + "%2f&a=" + grandom
-  );
+  viewerWindow.loadURL(baseUrl + "/app/beditor?id=" + url + "%2f&a=" + grandom);
 
   return viewerWindow;
 }
@@ -391,7 +392,7 @@ function createAppWindow() {
   // In production, set the initial browser path to the local bundle generated
   // by the Create React App build process.
   // In development, set it to localhost to allow live/hot-reloading.
-  const appURL = "https://app.ininotes.com/app/library?a=" + grandom;
+  const appURL = baseUrl + "/app/library?a=" + grandom;
 
   appWindow.loadURL(appURL);
   // cutterWindow.loadURL(appURL);
@@ -707,13 +708,11 @@ const createScreenShotWindow = () => {
       // cutterWindow.hide();
       // helpWindow.hide();
 
-      const appURL =
-        "https://app.ininotes.com/help/help?i=" + grandom + Date.now();
+      const appURL = baseUrl + "/help/help?i=" + grandom + Date.now();
 
       helpWindow.loadURL(appURL);
 
-      const appURLCutter =
-        "https://app.ininotes.com/app/clipper/?a=" + grandom + Date.now();
+      const appURLCutter = baseUrl + "/app/clipper/?a=" + grandom + Date.now();
 
       cutterWindow.loadURL(appURLCutter);
 
@@ -806,11 +805,11 @@ const createScreenShotWindow = () => {
     grandom = version;
 
     if (version !== oldVersion && oldVersion) {
-      const appURL = "https://app.ininotes.com/help/help?i=" + grandom;
+      const appURL = baseUrl + "/help/help?i=" + grandom;
 
       helpWindow.loadURL(appURL);
 
-      const appURLCutter = "https://app.ininotes.com/app/clipper/?a=" + grandom;
+      const appURLCutter = baseUrl + "/app/clipper/?a=" + grandom;
 
       cutterWindow.loadURL(appURLCutter);
 
@@ -1157,6 +1156,7 @@ app.on("window-all-closed", function () {
 // it is a good idea to limit navigation outright to that known scope,
 // disallowing any other kinds of navigation.
 const allowedNavigationDestinations = [
+  baseUrl,
   "https://app.ininotes.com",
   "https://docs.google.com",
   "https://drive.google.com",
